@@ -401,21 +401,39 @@ for (i in 1:dim(stations)[1]){
 dev.off()
 
 
-## EXTRA
+#----Extra: Estudio de los residuos----
 library(lubridate)
-ind <- which(pred_q0.95$station == 420)
-zgz <- pred_q0.95$Y[ind] - pred_q0.95$pred_q0.95[ind]
+dev.off()
 
-zgz <- data.frame(Date = as.Date(pred_q0.95$Date[ind]), zgz)
+png('res_mod.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+for (i in 1:dim(stations)[1]){
+  ind <- which(pred_q0.95$station == stations$STAID[i])
+  name <- stations$NAME2[i]
+  
+  # model residuals
+  aux <- data.frame(
+    Date = pred_q0.95$Date[ind],
+    res_mod_bay = pred_q0.95$Y[ind] - pred_q0.95$pred_q0.95[ind]
+  )
+  
+  res_mod_bay <- tapply(aux$res_mod_bay, year(aux$Date), mean)
+  
+  # residuals of model with only harmonics (scaled)
+  mod_harm <- rq(Y ~ c.1 + s.1, data = v_q0.95, subset = ind, tau = 0.95)
+  res_mod_harm <- tapply(mod_harm$residuals, year(aux$Date), mean)
+  
+  # graph
+  t <- 1:64
+  min <- min(c(res_mod_bay, res_mod_harm))
+  max <- max(c(res_mod_bay, res_mod_harm))
+  
+  plot(res_mod_bay, ylim = c(min, max), type = 'l',
+       main = name)
+  abline(lm(res_mod_bay ~ t))
+  lines(res_mod_harm, col = 'red')
+  abline(lm(res_mod_harm ~ t), col = 'red')
+  
+}
+dev.off()
 
-res <- tapply(zgz$zgz, year(zgz$Date), mean)
-
-
-
-mod <- rq(Y ~ c.1 + s.1, data = v_q0.95, subset = ind, tau = 0.95)
-res_2 <- tapply(mod$residuals, year(zgz$Date), mean)
-t <- 1:64
-plot( res_2, type = 'l')
-abline(lm(res_2 ~ t))
-lines(res, col = 'red')
-abline(lm(res ~ t), col = 'red')
