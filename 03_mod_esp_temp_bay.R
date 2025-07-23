@@ -6,8 +6,8 @@ rm(list = setdiff(ls(), c('df_final',
                           'formula',
                           'vars',
                           'modelos_finales_q0.95')))
-setwd('C:/Users/jumar/OneDrive/Escritorio/TFM/ProyectoN4')
-#load('data.RData')
+
+load('data.RData')
 
 library(spTReg)
 library(quantreg)
@@ -254,12 +254,12 @@ R1_bay <- function(pred, tau){
 
 R1_bay_q0.95 <- R1_bay(pred_q0.95, 0.95)
 
-# save(Y, df_final, stations, stations_dist, 
-#      modelos_proyecto_q0.95, modelos_proyecto_q0.95_AIC, 
-#      vars, v_q0.95, 
+# save(Y, df_final, stations, stations_dist,
+#      modelos_proyecto_q0.95, modelos_proyecto_q0.95_AIC,
+#      vars, v_q0.95,
 #      modelos_finales_q0.95,
 #      formula, mod_q0.95_bay, elev_sc, dist_sc,
-#      pred_q0.95, R1_bay_q0.95,
+#      pred_q0.95, R1_bay_q0.95, rho_q0.95,
 #      file = 'data.RData')
 
 #----RHO----
@@ -364,39 +364,22 @@ rho_bay <- function(predicciones, tau){
 
 rho_q0.95 <- rho_bay(pred_q0.95, 0.95)
 
-
+# Gráficas de desagregación
 par(mfrow = c(1, 2))
 plot(1:length(rho_q0.95$rho_dias$rho_bay_dia), 
      rho_q0.95$rho_dias$rho_bay_dia, type = "l", xlab = "l", 
      ylab = expression(rho[l](0.95)),
-     ylim=c(0.9,1))
-abline(h=0.95,col='red')
-
-plot(1:length(rho_q0.95_def$rho_dias$rho_bay_dia), 
-     rho_q0.95_def$rho_dias$rho_bay_dia, type = "l", xlab = "l", 
-     ylab = expression(rho[l](0.95)),
-     ylim=c(0.9,1))
+     ylim=c(0.85,1),
+     main = 'Desagregación por días')
 abline(h=0.95,col='red')
 
 plot(1:length(rho_q0.95$rho_años$rho_bay_year), 
      rho_q0.95$rho_años$rho_bay_year, type = "l", xlab = "t", 
      ylab = expression(rho[t](0.95)),
-     ylim=c(0.8,1))
+     ylim=c(0.85,1),
+     main = 'Desagregación por años')
 abline(h=0.95,col='red')
 
-plot(1:length(rho_q0.95_def$rho_años$rho_bay_year), 
-     rho_q0.95_def$rho_años$rho_bay_year, type = "l", xlab = "t", 
-     ylab = expression(rho[t](0.95)),
-     ylim=c(0.85,1))
-abline(h=0.95,col='red')
-
-save(Y, df_final, stations, stations_dist, 
-     modelos_proyecto_q0.95, modelos_proyecto_q0.95_AIC, 
-     vars, v_q0.95, 
-     modelos_finales_q0.95,
-     formula, mod_q0.95_bay, elev_sc, dist_sc,
-     pred_q0.95, R1_bay_q0.95, rho_q0.95,
-     file = 'data.RData')
 
 png('rho_def.png', width = 2000*3/2, height = 2200*3/2, res = 150)
 par(mfrow=c(10,8))
