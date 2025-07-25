@@ -176,16 +176,16 @@ betas_q0.95 <- betas(vars, mod_q0.95_bay, cuantil = 0.95)
 
 
 #----Predicciones----
-predictions <- function(vars, mod, betas, df, cuantil){
+predictions <- function(vars, betas, df, cuantil){
   pred <- numeric(nrow(df))
   for (i in 1:dim(stations)[1]){
     ind <- which(df$station == stations$STAID[i])
     for (j in ind){
       #inicializar en interceptos
       comp_esp <- betas[i, 'beta1'] #intercepto espacial para la estacion i
-      #comp_esp<-mean(mod$p.params.samples[,paste0('beta1(s',i,')')])
+      
       comp_fija <- betas[i, 'intercept'] #intercepto fijo para la estacion i
-      #comp_fija<-mean(mod$p.params.samples[,'(Intercept)'])
+      
       for (k in 1:(length(vars))){ #beta 1 es la componente espacial del intercepto
         comp_esp <- comp_esp + betas[i, paste0('beta', k + 1)] * df[j, vars[k]]
         comp_fija <- comp_fija + betas[i, vars[k]] * df[j, vars[k]]

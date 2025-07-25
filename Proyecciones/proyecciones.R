@@ -220,4 +220,99 @@ for (j in 30:39){
   df_final_proy[,paste0('I(',var,'^2)')] <- df_final_proy[,var]^2
 }
 
+# guardado de solo las variables que se ajustan en el modelo
+vars <- readRDS('vars.rds')
 
+# Creación de fórmula. Si aparece al cuadrado y normal como polinomio ortogonal
+generar_formula_poly <- function(vars) {
+  # variables cuadráticas
+  quad_vars <- gsub("^I\\((.*)\\^2\\)$", "\\1", grep("^I\\(.*\\^2\\)$", vars, value = TRUE))
+  
+  # variables lineales
+  lin_vars <- setdiff(vars, grep("^I\\(.*\\^2\\)$", vars, value = TRUE))
+  
+  # Lista de variables finales para la fórmula
+  vars_finales <- c()
+  
+  for (var in lin_vars) {
+    if (var %in% quad_vars) {
+      # poly() si hay término lineal y cudrático
+      vars_finales <- c(vars_finales, paste0("poly(", var, ", 2)"))
+    } else {
+      vars_finales <- c(vars_finales, var)
+    }
+  }
+  
+  # cuadráticas que sin parte lineal
+  quad_solo <- setdiff(quad_vars, lin_vars)
+  for (var in quad_solo) {
+    vars_finales <- c(vars_finales, paste0("I(", var, "^2)"))
+  }
+  
+  # fórmula final
+  return(vars_finales)
+}
+
+vars_finales <- generar_formula_poly(vars)
+# esta fórmula permite observar cuales tienen valor poly
+# (aunque luego no se usa, porque se mantienen los nombres originales)
+
+# Crear una lista para ir almacenando las columnas
+columnas <- list()
+
+# ESCALAR SEGÚN EL ESCALADO UTILIZADO EN EL MODELO AJUSTADO
+escalado_info <- readRDS("escalado_info.rds")
+
+for (var in vars_finales) {
+  if (grepl("^poly\\(", var)) {
+    # Extraer el nombre real de la variable dentro del poly()
+    nombre_var <- sub("^poly\\(([^,]+),.*", "\\1", var)
+    
+    # Calcular los términos polinómicos SIN escalar
+    poly_cols <- poly(df_final_proy[[nombre_var]], degree = 2)
+    
+    # Recuperar los parámetros de escalado guardados
+    info <- escalado_info[[nombre_var]]
+    # info$center y info$scale son vectores con 2 elementos (uno por columna del poly)
+    
+    # Escalar con la misma media y sd que en el dataset original
+    poly_scaled <- sweep(poly_cols, 2, info$center, "-")
+    poly_scaled <- sweep(poly_scaled, 2, info$scale, "/")
+    
+    # Asignar nombres
+    colnames(poly_scaled) <- c(nombre_var, paste0("I(", nombre_var, "^2)"))
+    
+    # Añadir al listado
+    columnas[[length(columnas) + 1]] <- as.data.frame(poly_scaled)
+    
+  } else {
+    # Recuperar info de escalado para la variable
+    info <- escalado_info[[var]]
+    
+    # Escalar manualmente
+    var_scaled <- (df_final_proy[[var]] - info$center) / info$scale
+    
+    columnas[[length(columnas) + 1]] <- data.frame(var_scaled)
+    colnames(columnas[[length(columnas)]]) <- var
+  }
+}
+
+
+# Combinar todas las columnas en un único dataframe
+v_q0.95_proy <- do.call(cbind, columnas)
+v_q0.95_proy <- v_q0.95_proy[, vars]
+v_q0.95_proy$elev <- as.numeric(df_final_proy$elev)
+v_q0.95_proy$dist <- as.numeric(df_final_proy$dist)
+v_q0.95_proy$Date <- df_final_proy$Date
+v_q0.95_proy$station <- as.integer(df_final_proy$station)
+v_q0.95_proy$Y <- df_final_proy$Y
+v_q0.95_proy <- v_q0.95_proy[, c((ncol(v_q0.95_proy)-2):ncol(v_q0.95_proy), 1:(ncol(v_q0.95_proy)-3))]
+
+save(stations,
+     stations_dist,
+     df_final_proy,
+     outdf,
+     v_q0.95_proy,
+     Y,
+     vars,
+     file = 'proyecciones.RData')
