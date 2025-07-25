@@ -21,7 +21,7 @@ for (i in 1:dim(stations)[1]){
   name <- stations$NAME2[i]
   
   qqplot(pred_q0.95_comp$pred_q0.95[ind], pred_q0.95_comp$pred_q0.95_proy[ind],
-         main = paste("QQ Plot: ERA5 vs CMIP6 (,", name,")"),
+         main = paste0("QQ Plot: ERA5 vs CMIP6 (", name,")"),
          xlab = "ERA5",
          ylab = "CMIP6")
   abline(0, 1, col = "red")
@@ -45,9 +45,9 @@ for (i in 1:dim(stations)[1]){
                    to   = max(pred_q0.95_comp$pred_q0.95_proy[ind]))
   
   plot(dens1, col = "blue", lwd = 2, 
-       main = paste('Dens. ERA5 vs CMIP6 (', name, ')'))
+       main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'))
   lines(dens2, col = "red", lwd = 2)
-  legend("topright", legend = c("ERA5", "CMIP6"),
+  legend("topleft", legend = c("ERA5", "CMIP6"),
          col = c("blue", "red"), lwd = 2)
   
 }
