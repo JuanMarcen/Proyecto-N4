@@ -1,4 +1,4 @@
-rm(list=ls())
+rm(list=setdiff(ls(), 'df_proy'))
 setwd('C:/Users/jumar/OneDrive/Escritorio/TFM/ProyectoN4')
 
 stations <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/stations.rds")
