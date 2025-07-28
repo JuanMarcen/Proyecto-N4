@@ -13,39 +13,42 @@ load('data.RData')
 pred_q0.95_era5 <- pred_q0.95[which(pred_q0.95$Date >= fechas_cmip6[1] & pred_q0.95$Date <= fechas_cmip6[2]), ]
 
 pred_q0.95_comp <- cbind(pred_q0.95_era5, pred_q0.95_proy)
+pred_q0.95_comp_ref <- pred_q0.95_comp[which(pred_q0.95_comp$Date >= '1981-06-01' &
+                                               pred_q0.95_comp$Date <= '2010-08-31'), ]
 
-png('comp_qqplot.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('comp_qqplot_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
-  ind <- which(pred_q0.95_comp$station == stations$STAID[i])
+  ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i])
   name <- stations$NAME2[i]
   
-  qqplot(pred_q0.95_comp$pred_q0.95[ind], pred_q0.95_comp$pred_q0.95_proy[ind],
+  qqplot(pred_q0.95_comp_ref$pred_q0.95[ind], pred_q0.95_comp_ref$pred_q0.95_proy[ind],
          main = paste0("QQ Plot: ERA5 vs CMIP6 (", name,")"),
-         xlab = "ERA5",
-         ylab = "CMIP6")
+         xlab = "ERA5 (ºC)",
+         ylab = "CMIP6 (ºC)")
   abline(0, 1, col = "red")
   
   
 }
 dev.off()
 
-png('comp_dens.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('comp_dens_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
-  ind <- which(pred_q0.95_comp$station == stations$STAID[i])
+  ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i])
   name <- stations$NAME2[i]
   
-  dens1 <- density(pred_q0.95_comp$pred_q0.95[ind], 
-                   from = min(pred_q0.95_comp$pred_q0.95[ind]),
-                   to   = max(pred_q0.95_comp$pred_q0.95[ind]))
+  dens1 <- density(pred_q0.95_comp_ref$pred_q0.95[ind], 
+                   from = min(pred_q0.95_comp_ref$pred_q0.95[ind]),
+                   to   = max(pred_q0.95_comp_ref$pred_q0.95[ind]))
   
-  dens2 <- density(pred_q0.95_comp$pred_q0.95_proy[ind], 
-                   from = min(pred_q0.95_comp$pred_q0.95_proy[ind]),
-                   to   = max(pred_q0.95_comp$pred_q0.95_proy[ind]))
+  dens2 <- density(pred_q0.95_comp_ref$pred_q0.95_proy[ind], 
+                   from = min(pred_q0.95_comp_ref$pred_q0.95_proy[ind]),
+                   to   = max(pred_q0.95_comp_ref$pred_q0.95_proy[ind]))
   
   plot(dens1, col = "blue", lwd = 2, 
-       main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'))
+       main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'),
+       xlab = 'ºC')
   lines(dens2, col = "red", lwd = 2)
   legend("topleft", legend = c("ERA5", "CMIP6"),
          col = c("blue", "red"), lwd = 2)
