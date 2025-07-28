@@ -175,9 +175,11 @@ cs <- function(t,harmonics=1) {
 }
 
 df_proy <- cbind(df_proy, cs(df_proy$l, 1))
+df_cmip6 <- df_proy
 
 # anomalías
 # cálculo local de anomalías. Ref 1981-2010
+# no estandarizadas
 for (i in 1:dim(stations)[1]){
   ind <- which(df_proy$station == stations$STAID[i])
   ind_jja <- which(df_proy$t[ind] >= 22 & df_proy$t[ind] <= 51 & df_proy$l[ind] >= 152)
@@ -198,6 +200,34 @@ for (i in 1:dim(stations)[1]){
   }
   
 }
+
+# estandarizadas segun los lm 
+df_era5 <- readRDS('df_era5.rds')
+df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
+
+for (i in 1:dim(stations)[1]){
+  ind <- which(df_proy$station == stations$STAID[i])
+  ind_jja <- which(df_proy$t[ind] >= 22 & df_proy$t[ind] <= 51 & df_proy$l[ind] >= 152)
+  
+  for (j in 4:13){
+    var <- names(df_proy)[j]
+    formula <- as.formula(paste(var, "~ s.1 + c.1"))
+    mod <- lm(formula, data = df_proy[ind,], subset = ind_jja)
+    preds <- predict(mod, newdata = data.frame(
+      c.1 = df_proy$c.1[ind],
+      s.1 = df_proy$s.1[ind]
+    ))
+    
+    res <- df_proy[ind, var] - preds
+    #print(sum(preds[ind_jja] - mod$fitted.values <= 1e-10))
+    
+    mod2<- lm(formula, data = df_era5[ind,], subset = ind_jja)
+    #guardado de estandarizado
+    df_proy[ind,var] <- res * summary(mod2)$sigma / summary(mod)$sigma
+  }
+  
+}
+
 
 # cuadrado de anomalias
 for (j in 4:13){
@@ -262,8 +292,11 @@ columnas <- list()
 
 # ESCALAR SEGÚN EL ESCALADO UTILIZADO EN EL MODELO AJUSTADO
 escalado_info <- readRDS("escalado_info.rds")
+df_era5 <- readRDS('df_era5.rds')
+df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
 
 for (var in vars_finales) {
+  cat('Variable: ', var, '\n')
   if (grepl("^poly\\(", var)) {
     # Extraer el nombre real de la variable dentro del poly()
     nombre_var <- sub("^poly\\(([^,]+),.*", "\\1", var)
@@ -308,11 +341,61 @@ v_q0.95_proy$station <- as.integer(df_final_proy$station)
 v_q0.95_proy$Y <- df_final_proy$Y
 v_q0.95_proy <- v_q0.95_proy[, c((ncol(v_q0.95_proy)-2):ncol(v_q0.95_proy), 1:(ncol(v_q0.95_proy)-3))]
 
+# extra escalado (Jorge)
+sigmas <- data.frame(
+  matrix(NA, nrow = dim(df_cmip6)[1], ncol = 2 * length(vars))
+)
+colnames(sigmas) <- c(paste0('sd_era5_', vars), paste0('sd_cmip6_', vars))
+sigmas$Date <- df_cmip6$Date
+for(var in vars){
+  cat('Variable: ', var, '\n')
+  es_cuadrado <- grepl("^I\\(.*\\^2\\)$", var)
+  var_clean <- gsub('_lag', '', var)
+  var_clean <- gsub("^I\\((.*)\\^2\\)$", "\\1", var_clean)
+  cat('Transformada a ', var_clean, '\n')
+  
+  if (var == 's.1' || var == 'c.1'){
+    cat('Seno o coseno\n')
+    sigmas[, paste0('sd_cmip6_', var)] <- 1
+    sigmas[, paste0('sd_era5_', var)] <- 1
+    next
+  }
+  
+  for (i in 1:dim(stations)[1]){
+    ind <- which(df_cmip6$station == stations$STAID[i])
+    ind_jja <- which(df_cmip6$t[ind] >= 22 & df_cmip6$t[ind] <= 51 & df_cmip6$l[ind] >= 152)
+
+    formula <- as.formula(paste(var_clean, "~ s.1 + c.1"))
+    mod <- lm(formula, data = df_cmip6[ind,], subset = ind_jja)
+    mod2<- lm(formula, data = df_era5[ind,], subset = ind_jja)
+
+    if (es_cuadrado == FALSE){
+      sigmas[ind, paste0('sd_cmip6_', var)] <- summary(mod)$sigma
+      sigmas[ind, paste0('sd_era5_', var)] <- summary(mod2)$sigma
+    }else{
+      sigmas[ind, paste0('sd_cmip6_', var)] <- (summary(mod)$sigma)^2
+      sigmas[ind, paste0('sd_era5_', var)] <- (summary(mod2)$sigma)^2
+    }
+    
+  }
+}
+
+sigmas <- sigmas[which(format(sigmas$Date, '%m-%d') != '05-31'), ]
+
+v_q0.95_proy_est <- v_q0.95_proy
+for (var in vars){
+  v_q0.95_proy_est[, var] <- v_q0.95_proy_est[, var] * sigmas[, paste0('sd_era5_', var)] / sigmas[, paste0('sd_cmip6_', var)]
+}
+
+
 save(stations,
      stations_dist,
      df_final_proy,
      outdf,
      v_q0.95_proy,
+     v_q0.95_proy_est,
      Y,
      vars,
      file = 'proyecciones.RData')
+
+
