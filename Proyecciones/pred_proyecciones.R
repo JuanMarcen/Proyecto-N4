@@ -73,23 +73,35 @@ ks_months <- data.frame(
 )
 
 for (i in 1:dim(stations)[1]){
+  cat('Estación ', i, '\n')
   for (month in c('06', '07', '08')){
+    cat('mes', month, '\n')
     ind <- which(pred_q0.95_comp$station == stations$STAID[i] 
                  & format(pred_q0.95_comp$Date, '%m') == month)
+    
+    ind_ref <- which(pred_q0.95_comp_ref$station == stations$STAID[i] 
+                 & format(pred_q0.95_comp_ref$Date, '%m') == month)
+    
+    cat('ind: ', length(ind), '\tind_ref: ', length(ind_ref), '\n')
     
     mm_aux <- month.abb[as.integer(month)]
     ks <- ks.test(pred_q0.95_comp$pred_q0.95[ind], pred_q0.95_comp$pred_q0.95_proy[ind])
     
     ks_months[i, paste0(mm_aux, '.KS')] <- ks$statistic
     ks_months[i, paste0(mm_aux, '.KSp')] <- ks$p.value
+    
+    ks_ref <- ks.test(pred_q0.95_comp_ref$pred_q0.95[ind_ref], pred_q0.95_comp_ref$pred_q0.95_proy[ind_ref])
+    
+    ks_months[i, paste0(mm_aux, '.KS_ref')] <- ks_ref$statistic
+    ks_months[i, paste0(mm_aux, '.KSp_ref')] <- ks_ref$p.value
   }
 }
 
 source('mapa_Spain.R')
 
-jun <- spain_points(ks_months$Jun.KSp, stations, 'KS Test June', 'p-values')
-jul <- spain_points(ks_months$Jul.KSp, stations, 'KS Test July', 'p-values')
-aug <- spain_points(ks_months$Aug.KSp, stations, 'KS Test July', 'p-values')
+jun <- spain_points(ks_months$Jun.KSp, stations, 'KS Test June', 'p-value')
+jul <- spain_points(ks_months$Jul.KSp, stations, 'KS Test July', 'p-value')
+aug <- spain_points(ks_months$Aug.KSp, stations, 'KS Test July', 'p-value')
 
 p_values_month <- ggpubr::ggarrange(jun, jul, aug, nrow = 1, ncol = 3,
                   common.legend = T, legend = 'bottom')
@@ -101,3 +113,51 @@ ggsave(
   height = 5,     
   dpi = 300       
 )
+
+jun_ref <- spain_points(ks_months$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
+jul_ref <- spain_points(ks_months$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
+aug_ref <- spain_points(ks_months$Aug.KSp_ref, stations, 'KS Test July', 'p-values')
+
+p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, ncol = 3,
+                                    common.legend = T, legend = 'bottom')
+
+ggsave(
+  filename = "p_values_month_ref.png", 
+  plot = p_values_month_ref, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+
+# pruebas
+png('dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+for (i in 1:dim(stations)[1]){
+  ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i]
+               & format(pred_q0.95_comp_ref$Date, '%m') == '07')
+  
+  name <- stations$NAME2[i]
+  
+  dens1 <- density(pred_q0.95_comp_ref$pred_q0.95[ind], 
+                   from = min(pred_q0.95_comp_ref$pred_q0.95[ind]),
+                   to   = max(pred_q0.95_comp_ref$pred_q0.95[ind]))
+  
+  dens2 <- density(pred_q0.95_comp_ref$pred_q0.95_proy[ind], 
+                   from = min(pred_q0.95_comp_ref$pred_q0.95_proy[ind]),
+                   to   = max(pred_q0.95_comp_ref$pred_q0.95_proy[ind]))
+  
+  dens3 <- density(pred_q0.95_comp_ref$pred_q0.95_proy_est[ind], 
+                   from = min(pred_q0.95_comp_ref$pred_q0.95_proy_est[ind]),
+                   to   = max(pred_q0.95_comp_ref$pred_q0.95_proy_est[ind]))
+  
+  plot(dens1, col = "blue", lwd = 2, 
+       main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'),
+       xlab = 'ºC')
+  lines(dens2, col = "red", lwd = 2)
+  lines(dens3, col = "darkgreen", lwd = 2)
+  legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+         col = c("blue", "red", 'darkgreen'), lwd = 2)
+  
+}
+dev.off()

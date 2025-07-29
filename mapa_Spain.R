@@ -51,7 +51,7 @@ spain_points <- function(values, stations, title, title_legend){
     scale_color_gradientn(
       colors = c("#2c0072", "#ff6ec7", "#ffe680", "#fdae61", "#f0f0f0"),
       values = scales::rescale(c(0, 0.05, 0.10, 0.20, 0.30)),
-      name = "p-valor",
+      name = title_legend,
       limits = c(0, 0.30),
       breaks = seq(0, 0.30, 0.05)
     ) + theme(
