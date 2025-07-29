@@ -85,4 +85,19 @@ for (i in 1:dim(stations)[1]){
   }
 }
 
+source('mapa_Spain.R')
 
+jun <- spain_points(ks_months$Jun.KSp, stations, 'KS Test June', 'p-values')
+jul <- spain_points(ks_months$Jul.KSp, stations, 'KS Test July', 'p-values')
+aug <- spain_points(ks_months$Aug.KSp, stations, 'KS Test July', 'p-values')
+
+p_values_month <- ggpubr::ggarrange(jun, jul, aug, nrow = 1, ncol = 3,
+                  common.legend = T, legend = 'bottom')
+
+ggsave(
+  filename = "p_values_month.png", 
+  plot = p_values_month, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
