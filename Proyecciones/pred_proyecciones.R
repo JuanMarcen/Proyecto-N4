@@ -20,7 +20,7 @@ pred_q0.95_comp <- cbind(pred_q0.95_era5, pred_q0.95_proy, pred_q0.95_proy_est)
 pred_q0.95_comp_ref <- pred_q0.95_comp[which(pred_q0.95_comp$Date >= '1981-06-01' &
                                                pred_q0.95_comp$Date <= '2010-08-31'), ]
 
-png('comp_qqplot_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/comp_qqplot_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
   ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i])
@@ -36,7 +36,7 @@ for (i in 1:dim(stations)[1]){
 }
 dev.off()
 
-png('comp_dens_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/comp_dens_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
   ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i])
@@ -107,7 +107,7 @@ p_values_month <- ggpubr::ggarrange(jun, jul, aug, nrow = 1, ncol = 3,
                   common.legend = T, legend = 'bottom')
 
 ggsave(
-  filename = "p_values_month.png", 
+  filename = "Proyecciones/p_values_month.png", 
   plot = p_values_month, 
   width = 12,
   height = 5,     
@@ -122,7 +122,7 @@ p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, nco
                                     common.legend = T, legend = 'bottom')
 
 ggsave(
-  filename = "p_values_month_ref.png", 
+  filename = "Proyecciones/p_values_month_ref.png", 
   plot = p_values_month_ref, 
   width = 12,
   height = 5,     
@@ -180,18 +180,19 @@ p_values_periods <- ggpubr::ggarrange(ks_p1, ks_p2, ks_p3, nrow = 1, ncol = 3,
                                     common.legend = T, legend = 'bottom')
 
 ggsave(
-  filename = "p_values_periods.png", 
+  filename = "Proyecciones/p_values_periods.png", 
   plot = p_values_periods, 
   width = 12,
   height = 5,     
   dpi = 300       
 )
+
 # pruebas
-png('dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/dens_aug_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
   ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i]
-               & format(pred_q0.95_comp_ref$Date, '%m') == '07')
+               & format(pred_q0.95_comp_ref$Date, '%m') == '08')
   
   name <- stations$NAME2[i]
   
