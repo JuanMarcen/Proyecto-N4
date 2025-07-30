@@ -20,6 +20,219 @@ pred_q0.95_comp <- cbind(pred_q0.95_era5, pred_q0.95_proy, pred_q0.95_proy_est)
 pred_q0.95_comp_ref <- pred_q0.95_comp[which(pred_q0.95_comp$Date >= '1981-06-01' &
                                                pred_q0.95_comp$Date <= '2010-08-31'), ]
 
+p1 <- which(year(pred_q0.95_comp$Date) >= '1960'
+            & year(pred_q0.95_comp$Date) <= '1977')
+p2 <- which(year(pred_q0.95_comp$Date) >= '1978'
+            & year(pred_q0.95_comp$Date) <= '1995')
+p3 <- which(year(pred_q0.95_comp$Date) >= '1996')
+p4 <- which(year(pred_q0.95_comp$Date) >= '2011')
+
+#----DENSIDADES----
+density_plots <- function(data, col1, col2, col3, 
+                          type = NULL, month = NULL, period = NULL){
+  if (is.null(type)){
+    for (i in 1:dim(stations)[1]){
+      ind <- which(data$station == stations$STAID[i])
+      name <- stations$NAME2[i]
+      
+      dens1 <- density(data[ind, col1], 
+                       from = min(data[ind, col1]),
+                       to   = max(data[ind, col1]))
+      
+      
+      dens2 <- density(data[ind, col2], 
+                       from = min(data[ind, col2]),
+                       to   = max(data[ind, col2]))
+      
+      dens3 <- density(data[ind, col3], 
+                       from = min(data[ind, col3]),
+                       to   = max(data[ind, col3]))
+      
+      plot(dens1, col = "blue", lwd = 2, 
+           main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'),
+           xlab = 'ºC',
+           ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
+      lines(dens2, col = "red", lwd = 2)
+      lines(dens3, col = "darkgreen", lwd = 2)
+      
+      legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+             col = c("blue", "red", 'darkgreen'), lwd = 2)
+      
+    }
+  }else if (type == 'months' & !is.null(month)){
+    for (i in 1:dim(stations)[1]){
+      ind <- which(data$station == stations$STAID[i]
+                   & format(data$Date, '%m') == month)
+      
+      name <- stations$NAME2[i]
+      
+      dens1 <- density(data[ind, col1], 
+                       from = min(data[ind, col1]),
+                       to   = max(data[ind, col1]))
+      
+      dens2 <- density(data[ind, col2], 
+                       from = min(data[ind, col2]),
+                       to   = max(data[ind, col2]))
+      
+      dens3 <- density(data[ind, col3], 
+                       from = min(data[ind, col3]),
+                       to   = max(data[ind, col3]))
+      
+      mm.aux <- month.abb[as.integer(month)]
+      plot(dens1, col = "blue", lwd = 2, 
+           main = paste0('Dens. ', mm.aux, ' ERA5 vs CMIP6 (', name, ')'),
+           xlab = 'ºC',
+           ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
+      lines(dens2, col = "red", lwd = 2)
+      lines(dens3, col = "darkgreen", lwd = 2)
+      
+      legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+             col = c("blue", "red", 'darkgreen'), lwd = 2)
+      
+    }
+  }else if (type == 'period' & !is.null(period)){
+    for (i in 1:dim(stations)[1]){
+      data_period <- data[period, ]
+      ind <- which(data_period$station == stations$STAID[i])
+      
+      name <- stations$NAME2[i]
+      
+      dens1 <- density(data_period[ind, col1], 
+                       from = min(data_period[ind, col1]),
+                       to   = max(data_period[ind, col1]))
+      
+      dens2 <- density(data_period[ind, col2], 
+                       from = min(data_period[ind, col2]),
+                       to   = max(data_period[ind, col2]))
+      
+      dens3 <- density(data_period[ind, col3], 
+                       from = min(data_period[ind, col3]),
+                       to   = max(data_period[ind, col3]))
+      
+      period.aux <- c(min(year(data_period$Date)), max(year(data_period$Date)))
+      plot(dens1, col = "blue", lwd = 2, 
+           main = paste0('Dens. ', period.aux[1], '-', period.aux[2], ' . ERA5 vs CMIP6 (', name, ')'),
+           xlab = 'ºC',
+           ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
+      lines(dens2, col = "red", lwd = 2)
+      lines(dens3, col = "darkgreen", lwd = 2)
+      
+      legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+             col = c("blue", "red", 'darkgreen'), lwd = 2)
+      
+    }
+  }
+}
+
+png('Proyecciones/comp_dens.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est')
+dev.off()
+
+png('Proyecciones/comp_dens_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est')
+dev.off()
+
+#por meses 
+png('Proyecciones/dens_jun.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'months',
+              month = '06')
+dev.off()
+
+png('Proyecciones/dens_jun_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'months',
+              month = '06')
+dev.off()
+
+png('Proyecciones/dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'months',
+              month = '07')
+dev.off()
+
+png('Proyecciones/dens_jul_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'months',
+              month = '07')
+dev.off()
+
+png('Proyecciones/dens_aug.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'months',
+              month = '08')
+dev.off()
+
+png('Proyecciones/dens_aug_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'months',
+              month = '08')
+dev.off()
+
+#por periodos
+png('Proyecciones/dens_p1.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'period',
+              period = p1)
+dev.off()
+
+png('Proyecciones/dens_p2.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'period',
+              period = p2)
+dev.off()
+
+png('Proyecciones/dens_p3.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'period',
+              period = p3)
+dev.off()
+
+#----QQPLOTS----
 png('Proyecciones/comp_qqplot_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
@@ -36,38 +249,7 @@ for (i in 1:dim(stations)[1]){
 }
 dev.off()
 
-png('Proyecciones/comp_dens_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
-par(mfrow=c(10,4))
-for (i in 1:dim(stations)[1]){
-  ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i])
-  name <- stations$NAME2[i]
-  
-  dens1 <- density(pred_q0.95_comp_ref$pred_q0.95[ind], 
-                   from = min(pred_q0.95_comp_ref$pred_q0.95[ind]),
-                   to   = max(pred_q0.95_comp_ref$pred_q0.95[ind]))
-  
-  dens2 <- density(pred_q0.95_comp_ref$pred_q0.95_proy[ind], 
-                   from = min(pred_q0.95_comp_ref$pred_q0.95_proy[ind]),
-                   to   = max(pred_q0.95_comp_ref$pred_q0.95_proy[ind]))
-  
-  dens3 <- density(pred_q0.95_comp_ref$pred_q0.95_proy_est[ind], 
-                   from = min(pred_q0.95_comp_ref$pred_q0.95_proy_est[ind]),
-                   to   = max(pred_q0.95_comp_ref$pred_q0.95_proy_est[ind]))
-  
-  plot(dens1, col = "blue", lwd = 2, 
-       main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'),
-       xlab = 'ºC',
-       ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
-  lines(dens2, col = "red", lwd = 2)
-  lines(dens3, col = "darkgreen", lwd = 2)
-  legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
-         col = c("blue", "red", 'darkgreen'), lwd = 2)
-  
-}
-dev.off()
-
-
-# KS TEST
+#----KS TEST meses Y PERIODOS----
 ks_months <- data.frame(
   stations = stations$STAID,
   NAME2 = stations$NAME2
@@ -136,14 +318,6 @@ ks_periods <- data.frame(
   NAME2 = stations$NAME2
 )
 
-p1 <- which(year(pred_q0.95_comp$Date) >= '1960'
-            & year(pred_q0.95_comp$Date) <= '1977')
-p2 <- which(year(pred_q0.95_comp$Date) >= '1978'
-            & year(pred_q0.95_comp$Date) <= '1995')
-p3 <- which(year(pred_q0.95_comp$Date) >= '1996')
-
-p4 <- which(year(pred_q0.95_comp$Date) >= '2011')
-
 for (i in 1:dim(stations)[1]){
   cat('Estación ', i, '\n')
   ind_p1 <- which(pred_q0.95_comp$station[p1] == stations$STAID[i])
@@ -190,94 +364,39 @@ ggsave(
   dpi = 300       
 )
 
-# pruebas
-png('Proyecciones/dens_p4.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+
+#----MEDIAS ANUALES----
+medias_anuales <- function(data, station){
+  ind <- which(data$station == stations$STAID[station])
+  name <- stations$NAME2[station]
+  
+  aux <- data[ind, ]
+  
+  mu_era5 <- tapply(aux$pred_q0.95, year(aux$Date), mean)
+  mu_cmip6 <- tapply(aux$pred_q0.95_proy, year(aux$Date), mean)
+  
+  t <- unique(year(aux$Date))
+  plot(t, mu_era5, type = 'l',
+       main = paste('Medias anuales', name),
+       xlab = 't', ylab = 'ºC',
+       ylim = c(min(c(mu_era5, mu_cmip6)), max(c(mu_era5, mu_cmip6))))
+  lines(t, mu_cmip6, col = 'red')
+  abline(lm(mu_era5 ~ t))
+  abline(lm(mu_cmip6 ~ t), col = 'red')
+  legend("bottomright", legend = c("ERA5", "CMIP6"),
+         col = c("black", "red"), lwd = 2)
+}
+
+png('Proyecciones/medias_anuales.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
-  # ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i]
-  #              & format(pred_q0.95_comp_ref$Date, '%m') == '08')
-  
-  ind <- which(pred_q0.95_comp$station[p4] == stations$STAID[i])
-  
-  name <- stations$NAME2[i]
-  
-  dens1 <- density(pred_q0.95_comp$pred_q0.95[p4][ind], 
-                   from = min(pred_q0.95_comp$pred_q0.95[p4][ind]),
-                   to   = max(pred_q0.95_comp$pred_q0.95[p4][ind]))
-  
-  dens2 <- density(pred_q0.95_comp$pred_q0.95_proy[p4][ind], 
-                   from = min(pred_q0.95_comp$pred_q0.95_proy[p4][ind]),
-                   to   = max(pred_q0.95_comp$pred_q0.95_proy[p4][ind]))
-  
-  dens3 <- density(pred_q0.95_comp$pred_q0.95_proy_est[p4][ind], 
-                   from = min(pred_q0.95_comp$pred_q0.95_proy_est[p4][ind]),
-                   to   = max(pred_q0.95_comp$pred_q0.95_proy_est[p4][ind]))
-  
-  plot(dens1, col = "blue", lwd = 2, 
-       main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'),
-       xlab = 'ºC',
-       ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
-  lines(dens2, col = "red", lwd = 2)
-  lines(dens3, col = "darkgreen", lwd = 2)
-  legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
-         col = c("blue", "red", 'darkgreen'), lwd = 2)
-  
+  medias_anuales(pred_q0.95_comp, i)
 }
 dev.off()
 
-# FUNCION PARA PINTAR LAS DENSIDADES
-density_plots <- function(data, col1 = NULL, col2 = NULL, col3 = NULL){
-  for (i in 1:dim(stations)[1]){
-    ind <- which(data$station == stations$STAID[i])
-    name <- stations$NAME2[i]
-    
-    if(!is.null(col1)){
-    dens1 <- density(data[ind, col1], 
-                     from = min(data[ind, col1]),
-                     to   = max(data[ind, col1]))
-    }
-    
-    if(!is.null(col2)){
-    dens2 <- density(data[ind, col2], 
-                     from = min(data[ind, col2]),
-                     to   = max(data[ind, col2]))
-    }
-    
-    if(!is.null(col3)){
-    dens3 <- density(data[ind, col3], 
-                     from = min(data[ind, col3]),
-                     to   = max(data[ind, col3]))
-    }
-    
-    if(!is.null(col1)){
-    plot(dens1, col = "blue", lwd = 2, 
-         main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'),
-         xlab = 'ºC',
-         ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
-    }
-    if(!is.null(col2)) lines(dens2, col = "red", lwd = 2)
-    if(!is.null(col3)) lines(dens3, col = "darkgreen", lwd = 2)
-    
-    legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
-           col = c("blue", "red", 'darkgreen'), lwd = 2)
-    
-  }
+png('Proyecciones/medias_anuales_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+for (i in 1:dim(stations)[1]){
+  medias_anuales(pred_q0.95_comp_ref, i)
 }
-
-density_plots(pred_q0.95_comp_ref, 'pred_q0.95', 'pred_q0.95_proy', col3 = NULL)
-
-# extra (GUARDAR)
-# medias anuales de las predicciones
-# HACER PARA TODOS Y SUBIR AL LATEX. En periodo de referencia y no
-ind <- which(pred_q0.95_comp_ref$station == stations$STAID[14])
-
-bad <- pred_q0.95_comp_ref[ind, ]
-
-mu_era5 <- tapply(bad$pred_q0.95, year(bad$Date), mean)
-mu_cmip6 <- tapply(bad$pred_q0.95_proy, year(bad$Date), mean)
-
-t <- unique(year(bad$Date))
-plot(t, mu_era5, type = 'l')
-lines(t, mu_cmip6, col = 'red')
-abline(lm(mu_era5 ~ t))
-abline(lm(mu_cmip6 ~t), col = 'red')
+dev.off()
