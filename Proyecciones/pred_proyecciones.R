@@ -233,6 +233,7 @@ density_plots(pred_q0.95_comp,
 dev.off()
 
 #----QQPLOTS----
+#convertir a FUNCION 
 png('Proyecciones/comp_qqplot_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 for (i in 1:dim(stations)[1]){
