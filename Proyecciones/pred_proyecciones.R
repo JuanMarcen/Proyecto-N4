@@ -129,7 +129,63 @@ ggsave(
   dpi = 300       
 )
 
+# KS POR PERIODOS DE AÑOS 1960-2014
+ks_periods <- data.frame(
+  stations = stations$STAID,
+  NAME2 = stations$NAME2
+)
 
+p1 <- which(year(pred_q0.95_comp$Date) >= '1960'
+            & year(pred_q0.95_comp$Date) <= '1977')
+p2 <- which(year(pred_q0.95_comp$Date) >= '1978'
+            & year(pred_q0.95_comp$Date) <= '1995')
+p3 <- which(year(pred_q0.95_comp$Date) >= '1996')
+
+for (i in 1:dim(stations)[1]){
+  cat('Estación ', i, '\n')
+  ind_p1 <- which(pred_q0.95_comp$station[p1] == stations$STAID[i])
+  ind_p2 <- which(pred_q0.95_comp$station[p2] == stations$STAID[i])
+  ind_p3 <- which(pred_q0.95_comp$station[p3] == stations$STAID[i])
+  
+  cat('ind_p1: ', length(ind_p1), '\tind_p2: ', length(ind_p2), 
+      '\tind_p3: ', length(ind_p3), '\n')
+  
+  ks_p1 <- ks.test(pred_q0.95_comp$pred_q0.95[p1][ind_p1], 
+                   pred_q0.95_comp$pred_q0.95_proy[p1][ind_p1])
+  
+  ks_periods[i, 'p1.KS'] <- ks_p1$statistic
+  ks_periods[i, 'p1.KSp'] <- ks_p1$p.value
+  
+  ks_p2 <- ks.test(pred_q0.95_comp$pred_q0.95[p2][ind_p2], 
+                   pred_q0.95_comp$pred_q0.95_proy[p2][ind_p2])
+  
+  ks_periods[i, 'p2.KS'] <- ks_p2$statistic
+  ks_periods[i, 'p2.KSp'] <- ks_p2$p.value
+  
+  ks_p3 <- ks.test(pred_q0.95_comp$pred_q0.95[p3][ind_p3], 
+                   pred_q0.95_comp$pred_q0.95_proy[p3][ind_p3])
+  
+  ks_periods[i, 'p3.KS'] <- ks_p3$statistic
+  ks_periods[i, 'p3.KSp'] <- ks_p3$p.value
+
+}
+
+source('mapa_Spain.R')
+
+ks_p1 <- spain_points(ks_periods$p1.KSp, stations, 'KS Test 1960-1977', 'p-value')
+ks_p2 <- spain_points(ks_periods$p2.KSp, stations, 'KS Test 1979-1995', 'p-value')
+ks_p3 <- spain_points(ks_periods$p3.KSp, stations, 'KS Test 1996-2014', 'p-value')
+
+p_values_periods <- ggpubr::ggarrange(ks_p1, ks_p2, ks_p3, nrow = 1, ncol = 3,
+                                    common.legend = T, legend = 'bottom')
+
+ggsave(
+  filename = "p_values_periods.png", 
+  plot = p_values_periods, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
 # pruebas
 png('dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
