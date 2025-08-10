@@ -2,6 +2,7 @@
 rm(list = ls())
 load('predictions.RData')
 load('proyecciones.RData')
+library(lubridate)
 
 # anomalias estandarizadas según la regla utilizada para ajustar el modelo
 # (MPI - mean(ERA5)) / sd(ERA5)
