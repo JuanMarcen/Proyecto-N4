@@ -542,7 +542,7 @@ source('mapa_Spain.R')
 
 jun <- spain_points(ks_months$Jun.KSp, stations, 'KS Test June', 'p-value')
 jul <- spain_points(ks_months$Jul.KSp, stations, 'KS Test July', 'p-value')
-aug <- spain_points(ks_months$Aug.KSp, stations, 'KS Test July', 'p-value')
+aug <- spain_points(ks_months$Aug.KSp, stations, 'KS Test August', 'p-value')
 
 p_values_month <- ggpubr::ggarrange(jun, jul, aug, nrow = 1, ncol = 3,
                   common.legend = T, legend = 'bottom')
@@ -557,7 +557,7 @@ ggsave(
 
 jun_ref <- spain_points(ks_months$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
 jul_ref <- spain_points(ks_months$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
-aug_ref <- spain_points(ks_months$Aug.KSp_ref, stations, 'KS Test July', 'p-values')
+aug_ref <- spain_points(ks_months$Aug.KSp_ref, stations, 'KS Test August', 'p-values')
 
 p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, ncol = 3,
                                     common.legend = T, legend = 'bottom')
@@ -608,7 +608,7 @@ for (i in 1:dim(stations)[1]){
 source('mapa_Spain.R')
 
 ks_p1 <- spain_points(ks_periods$p1.KSp, stations, 'KS Test 1960-1977', 'p-value')
-ks_p2 <- spain_points(ks_periods$p2.KSp, stations, 'KS Test 1979-1995', 'p-value')
+ks_p2 <- spain_points(ks_periods$p2.KSp, stations, 'KS Test 1978-1995', 'p-value')
 ks_p3 <- spain_points(ks_periods$p3.KSp, stations, 'KS Test 1996-2014', 'p-value')
 
 p_values_periods <- ggpubr::ggarrange(ks_p1, ks_p2, ks_p3, nrow = 1, ncol = 3,
