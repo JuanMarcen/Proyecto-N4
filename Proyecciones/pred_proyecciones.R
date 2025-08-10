@@ -233,22 +233,278 @@ density_plots(pred_q0.95_comp,
               period = p3)
 dev.off()
 
+png('Proyecciones/dens_p4.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'period',
+              period = p4)
+dev.off()
+
 #----QQPLOTS----
 #convertir a FUNCION 
-png('Proyecciones/comp_qqplot_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
-par(mfrow=c(10,4))
-for (i in 1:dim(stations)[1]){
-  ind <- which(pred_q0.95_comp_ref$station == stations$STAID[i])
-  name <- stations$NAME2[i]
-  
-  qqplot(pred_q0.95_comp_ref$pred_q0.95[ind], pred_q0.95_comp_ref$pred_q0.95_proy_est[ind],
-         main = paste0("QQ Plot: ERA5 vs CMIP6 (", name,")"),
-         xlab = "ERA5 (ºC)",
-         ylab = "CMIP6 (ºC)")
-  abline(0, 1, col = "red")
-  
-  
+qqplots <- function(data, col1, col2, 
+                          type = NULL, month = NULL, period = NULL){
+  if (is.null(type)){
+    for (i in 1:dim(stations)[1]){
+      ind <- which(data$station == stations$STAID[i])
+      name <- stations$NAME2[i]
+      
+      qqplot(data[ind, col1], data[ind, col2],
+             main = paste0("QQ Plot: ERA5 vs CMIP6 (", name,")"),
+             xlab = "ERA5 (ºC)",
+             ylab = "CMIP6 (ºC)")
+      abline(0, 1, col = "red")
+      
+    }
+  }else if (type == 'months' & !is.null(month)){
+    for (i in 1:dim(stations)[1]){
+      ind <- which(data$station == stations$STAID[i]
+                   & format(data$Date, '%m') == month)
+      
+      name <- stations$NAME2[i]
+      
+      mm.aux <- month.abb[as.integer(month)]
+      qqplot(data[ind, col1], data[ind, col2],
+             main = paste0("QQ Plot ", mm.aux, ": ERA5 vs CMIP6 (", name,")"),
+             xlab = "ERA5 (ºC)",
+             ylab = "CMIP6 (ºC)")
+      abline(0, 1, col = "red")
+      
+    }
+  }else if (type == 'period' & !is.null(period)){
+    for (i in 1:dim(stations)[1]){
+      data_period <- data[period, ]
+      ind <- which(data_period$station == stations$STAID[i])
+      
+      name <- stations$NAME2[i]
+      
+      period.aux <- c(min(year(data_period$Date)), max(year(data_period$Date)))
+      
+      qqplot(data_period[ind, col1], data_period[ind, col2],
+             main = paste0("QQ Plot", period.aux[1], '-', period.aux[2], ": ERA5 vs CMIP6 (", name,")"),
+             xlab = "ERA5 (ºC)",
+             ylab = "CMIP6 (ºC)")
+      abline(0, 1, col = "red")
+      
+    }
+  }
 }
+
+## CON RESIDUOS SIN TRANSFORMAR
+png('Proyecciones/qqplots/qqplot.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy')
+dev.off()
+
+#por meses 
+png('Proyecciones/qqplots/qqplot_jun.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'months',
+              month = '06')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_jun_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'months',
+              month = '06')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'months',
+              month = '07')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_jul_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'months',
+              month = '07')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_aug.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'months',
+              month = '08')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_aug_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'months',
+              month = '08')
+dev.off()
+
+#por periodos
+png('Proyecciones/qqplots/qqplot_p1.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'period',
+              period = p1)
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_p2.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'period',
+              period = p2)
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_p3.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'period',
+              period = p3)
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_p4.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              type = 'period',
+              period = p4)
+dev.off()
+
+## CON RESIDUOS ESTANDARIZADOS
+png('Proyecciones/qqplots/qqplot_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est')
+dev.off()
+
+#por meses 
+png('Proyecciones/qqplots/qqplot_jun_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'months',
+        month = '06')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_jun_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'months',
+        month = '06')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_jul_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'months',
+        month = '07')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_jul_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'months',
+        month = '07')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_aug_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'months',
+        month = '08')
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_aug_ref_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp_ref, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'months',
+        month = '08')
+dev.off()
+
+#por periodos
+png('Proyecciones/qqplots/qqplot_p1_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'period',
+        period = p1)
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_p2_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'period',
+        period = p2)
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_p3_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'period',
+        period = p3)
+dev.off()
+
+png('Proyecciones/qqplots/qqplot_p4_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'period',
+        period = p4)
 dev.off()
 
 #----KS TEST meses Y PERIODOS----
