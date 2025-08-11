@@ -26,7 +26,12 @@ p1 <- which(year(pred_q0.95_comp$Date) >= '1960'
 p2 <- which(year(pred_q0.95_comp$Date) >= '1978'
             & year(pred_q0.95_comp$Date) <= '1995')
 p3 <- which(year(pred_q0.95_comp$Date) >= '1996')
-p4 <- which(year(pred_q0.95_comp$Date) >= '2011')
+
+p_ref_ant <- which(year(pred_q0.95_comp$Date) <= '1980')
+p_ref <- which(year(pred_q0.95_comp$Date) >= '1981'
+               & year(pred_q0.95_comp$Date) <= '2010')
+p_ref_post <- which(year(pred_q0.95_comp$Date) >= '2011')
+
 
 #----DENSIDADES----
 density_plots <- function(data, col1, col2, col3, 
@@ -233,14 +238,14 @@ density_plots(pred_q0.95_comp,
               period = p3)
 dev.off()
 
-png('Proyecciones/dens_p4.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/dens_p_ref_ant.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
               'pred_q0.95_proy',
               'pred_q0.95_proy_est',
               type = 'period',
-              period = p4)
+              period = p_ref_ant)
 dev.off()
 
 #----QQPLOTS----
@@ -391,13 +396,13 @@ qqplots(pred_q0.95_comp,
               period = p3)
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_p4.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/qqplot_p_ref_ant.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.95_comp, 
               'pred_q0.95', 
               'pred_q0.95_proy',
               type = 'period',
-              period = p4)
+              period = p_ref_ant)
 dev.off()
 
 ## CON RESIDUOS ESTANDARIZADOS
@@ -498,62 +503,138 @@ qqplots(pred_q0.95_comp,
         period = p3)
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_p4_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/qqplot_p_ref_ant_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.95_comp, 
         'pred_q0.95', 
         'pred_q0.95_proy_est',
         type = 'period',
-        period = p4)
+        period = p_ref_ant)
 dev.off()
 
 #----KS TEST meses Y PERIODOS----
-ks_months <- data.frame(
-  stations = stations$STAID,
-  NAME2 = stations$NAME2
-)
-
-for (i in 1:dim(stations)[1]){
-  cat('Estación ', i, '\n')
-  for (month in c('06', '07', '08')){
-    cat('mes', month, '\n')
-    ind <- which(pred_q0.95_comp$station == stations$STAID[i] 
-                 & format(pred_q0.95_comp$Date, '%m') == month)
+ks_test_df <- function(data, data_ref, type){
+  cat('KS según ', type, '\n')
+  
+  if (type == 'month'){
     
-    ind_ref <- which(pred_q0.95_comp_ref$station == stations$STAID[i] 
-                 & format(pred_q0.95_comp_ref$Date, '%m') == month)
+    ks_df <- data.frame(
+      stations = stations$STAID,
+      NAME2 = stations$NAME2
+    )
     
-    cat('ind: ', length(ind), '\tind_ref: ', length(ind_ref), '\n')
+    cat('Cálculo para periodo completo y para periodo de referencia\n')
     
-    mm_aux <- month.abb[as.integer(month)]
-    ks <- ks.test(pred_q0.95_comp$pred_q0.95[ind], pred_q0.95_comp$pred_q0.95_proy[ind])
+    for (i in 1:dim(stations)[1]){
+      
+      for (month in months){
+        
+        ind <- which(data$station == stations$STAID[i] 
+                     & format(data$Date, '%m') == month)
+        
+        ind_ref <- which(data_ref$station == stations$STAID[i] 
+                         & format(data_ref$Date, '%m') == month)
+        
+        mm_aux <- month.abb[as.integer(month)]
+        ks <- ks.test(data$pred_q0.95[ind], data$pred_q0.95_proy[ind])
+        
+        ks_df[i, paste0(mm_aux, '.KS')] <- ks$statistic
+        ks_df[i, paste0(mm_aux, '.KSp')] <- ks$p.value
+        
+        ks_ref <- ks.test(data_ref$pred_q0.95[ind_ref], data_ref$pred_q0.95_proy[ind_ref])
+        
+        ks_df[i, paste0(mm_aux, '.KS_ref')] <- ks_ref$statistic
+        ks_df[i, paste0(mm_aux, '.KSp_ref')] <- ks_ref$p.value
+      }
+    }
     
-    ks_months[i, paste0(mm_aux, '.KS')] <- ks$statistic
-    ks_months[i, paste0(mm_aux, '.KSp')] <- ks$p.value
+  }else if (type == 'period'){
     
-    ks_ref <- ks.test(pred_q0.95_comp_ref$pred_q0.95[ind_ref], pred_q0.95_comp_ref$pred_q0.95_proy[ind_ref])
+    cat('Cálculo según', type, '\n')
     
-    ks_months[i, paste0(mm_aux, '.KS_ref')] <- ks_ref$statistic
-    ks_months[i, paste0(mm_aux, '.KSp_ref')] <- ks_ref$p.value
+    ks_df <- data.frame(
+      stations = stations$STAID,
+      NAME2 = stations$NAME2
+    )
+    
+    for (i in 1:dim(stations)[1]){
+      
+      for (name in names(periods)){
+      
+        p <- periods[[name]]
+        
+        ind_p <- which(data$station[p] == stations$STAID[i])
+        ks_p <- ks.test(data$pred_q0.95[p][ind_p], 
+                         data$pred_q0.95_proy[p][ind_p])
+        
+        ks_df[i, paste0(name,'.KS')] <- ks_p$statistic
+        ks_df[i, paste0(name,'.KSp')] <- ks_p$p.value
+        
+      }
+      
+    }
+    
   }
+  
+  print(head(ks_df))
+  return(ks_df)
 }
 
-source('mapa_Spain.R')
+months <- c('06', '07', '08')
+ks_months <- ks_test_df(pred_q0.95_comp, pred_q0.95_comp_ref, type = 'month')
 
-jun <- spain_points(ks_months$Jun.KSp, stations, 'KS Test June', 'p-value')
-jul <- spain_points(ks_months$Jul.KSp, stations, 'KS Test July', 'p-value')
-aug <- spain_points(ks_months$Aug.KSp, stations, 'KS Test August', 'p-value')
+periods <- list(`1960.1977` = p1, `1978.1995` = p2, `1996.2014` = p3, 
+                `1960.1980` = p_ref_ant, `1981.2010` = p_ref, `2011.2014` = p_ref_post)
+ks_periods <- ks_test_df(pred_q0.95_comp, pred_q0.95_comp_ref, type = 'period')
 
-p_values_month <- ggpubr::ggarrange(jun, jul, aug, nrow = 1, ncol = 3,
-                  common.legend = T, legend = 'bottom')
 
-ggsave(
-  filename = "Proyecciones/p_values_month.png", 
-  plot = p_values_month, 
-  width = 12,
-  height = 5,     
-  dpi = 300       
-)
+
+# ks_months <- data.frame(
+#   stations = stations$STAID,
+#   NAME2 = stations$NAME2
+# )
+# 
+# for (i in 1:dim(stations)[1]){
+#   #cat('Estación ', i, '\n')
+#   for (month in c('06', '07', '08')){
+#     cat('mes', month, '\n')
+#     ind <- which(pred_q0.95_comp$station == stations$STAID[i] 
+#                  & format(pred_q0.95_comp$Date, '%m') == month)
+#     
+#     ind_ref <- which(pred_q0.95_comp_ref$station == stations$STAID[i] 
+#                  & format(pred_q0.95_comp_ref$Date, '%m') == month)
+#     
+#     cat('ind: ', length(ind), '\tind_ref: ', length(ind_ref), '\n')
+#     
+#     mm_aux <- month.abb[as.integer(month)]
+#     ks <- ks.test(pred_q0.95_comp$pred_q0.95[ind], pred_q0.95_comp$pred_q0.95_proy[ind])
+#     
+#     ks_months[i, paste0(mm_aux, '.KS')] <- ks$statistic
+#     ks_months[i, paste0(mm_aux, '.KSp')] <- ks$p.value
+#     
+#     ks_ref <- ks.test(pred_q0.95_comp_ref$pred_q0.95[ind_ref], pred_q0.95_comp_ref$pred_q0.95_proy[ind_ref])
+#     
+#     ks_months[i, paste0(mm_aux, '.KS_ref')] <- ks_ref$statistic
+#     ks_months[i, paste0(mm_aux, '.KSp_ref')] <- ks_ref$p.value
+#   }
+# }
+# 
+# source('mapa_Spain.R')
+# 
+# jun <- spain_points(ks_months$Jun.KSp, stations, 'KS Test June', 'p-value')
+# jul <- spain_points(ks_months$Jul.KSp, stations, 'KS Test July', 'p-value')
+# aug <- spain_points(ks_months$Aug.KSp, stations, 'KS Test August', 'p-value')
+# 
+# p_values_month <- ggpubr::ggarrange(jun, jul, aug, nrow = 1, ncol = 3,
+#                   common.legend = T, legend = 'bottom')
+# 
+# ggsave(
+#   filename = "Proyecciones/p_values_month.png", 
+#   plot = p_values_month, 
+#   width = 12,
+#   height = 5,     
+#   dpi = 300       
+# )
 
 jun_ref <- spain_points(ks_months$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
 jul_ref <- spain_points(ks_months$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
@@ -571,54 +652,81 @@ ggsave(
 )
 
 # KS POR PERIODOS DE AÑOS 1960-2014
-ks_periods <- data.frame(
-  stations = stations$STAID,
-  NAME2 = stations$NAME2
-)
+# ks_periods <- data.frame(
+#   stations = stations$STAID,
+#   NAME2 = stations$NAME2
+# )
+# 
+# for (i in 1:dim(stations)[1]){
+#   cat('Estación ', i, '\n')
+#   ind_p1 <- which(pred_q0.95_comp$station[p1] == stations$STAID[i])
+#   ind_p2 <- which(pred_q0.95_comp$station[p2] == stations$STAID[i])
+#   ind_p3 <- which(pred_q0.95_comp$station[p3] == stations$STAID[i])
+#   
+#   ind_p_ref_post <- which(pred_q0.95_comp$station[p_ref_post] == stations$STAID[i])
+#   ind_p_ref <- which(pred_q0.95_comp$station[p_ref] == stations$STAID[i])
+#   ind_p_ref_ant <- which(pred_q0.95_comp$station[p_ref_ant] == stations$STAID[i])
+#   
+#   # cat('ind_p1: ', length(ind_p1), '\tind_p2: ', length(ind_p2), 
+#   #     '\tind_p3: ', length(ind_p3), '\n')
+#   
+#   ks_p1 <- ks.test(pred_q0.95_comp$pred_q0.95[p1][ind_p1], 
+#                    pred_q0.95_comp$pred_q0.95_proy[p1][ind_p1])
+#   
+#   ks_periods[i, 'p1.KS'] <- ks_p1$statistic
+#   ks_periods[i, 'p1.KSp'] <- ks_p1$p.value
+#   
+#   ks_p2 <- ks.test(pred_q0.95_comp$pred_q0.95[p2][ind_p2], 
+#                    pred_q0.95_comp$pred_q0.95_proy[p2][ind_p2])
+#   
+#   ks_periods[i, 'p2.KS'] <- ks_p2$statistic
+#   ks_periods[i, 'p2.KSp'] <- ks_p2$p.value
+#   
+#   ks_p3 <- ks.test(pred_q0.95_comp$pred_q0.95[p3][ind_p3], 
+#                    pred_q0.95_comp$pred_q0.95_proy[p3][ind_p3])
+#   
+#   ks_periods[i, 'p3.KS'] <- ks_p3$statistic
+#   ks_periods[i, 'p3.KSp'] <- ks_p3$p.value
+#   
+#   ks_p_ref_post <- ks.test(pred_q0.95_comp$pred_q0.95[p_ref_post][ind_p_ref_post], 
+#                    pred_q0.95_comp$pred_q0.95_proy[p_ref_post][ind_p_ref_post])
+#   
+#   ks_periods[i, 'p_ref_post.KS'] <- ks_p_ref_post$statistic
+#   ks_periods[i, 'p_ref_post.KSp'] <- ks_p_ref_post$p.value
+#   
+#   ks_p_ref <- ks.test(pred_q0.95_comp$pred_q0.95[p_ref][ind_p_ref], 
+#                    pred_q0.95_comp$pred_q0.95_proy[p_ref][ind_p_ref])
+#   
+#   ks_periods[i, 'p_ref.KS'] <- ks_p_ref$statistic
+#   ks_periods[i, 'p_ref.KSp'] <- ks_p_ref$p.value
+#   
+#   ks_p_ref_ant <- ks.test(pred_q0.95_comp$pred_q0.95[p_ref_ant][ind_p_ref_ant], 
+#                    pred_q0.95_comp$pred_q0.95_proy[p_ref_ant][ind_p_ref_ant])
+#   
+#   ks_periods[i, 'p_ref_ant.KS'] <- ks_p_ref_ant$statistic
+#   ks_periods[i, 'p_ref_ant.KSp'] <- ks_p_ref_ant$p.value
+# 
+# }
+# 
+# source('mapa_Spain.R')
+# 
+ks_p1 <- spain_points(ks_periods$`1960.1977.KSp`, stations, 'KS Test 1960-1977', 'p-value')
+ks_p2 <- spain_points(ks_periods$`1978.1995.KSp`, stations, 'KS Test 1978-1995', 'p-value')
+ks_p3 <- spain_points(ks_periods$`1996.2014.KSp`, stations, 'KS Test 1996-2014', 'p-value')
+ks_p_ref_ant <- spain_points(ks_periods$`1960.1980.KSp`, stations, 'KS Test 1960-1980', 'p-value')
+ks_p_ref <- spain_points(ks_periods$`1981.2010.KSp`, stations, 'KS Test 1981-2010', 'p-value')
+ks_p_ref_post <- spain_points(ks_periods$`2011.2014.KSp`, stations, 'KS Test 2011-2014', 'p-value')
 
-for (i in 1:dim(stations)[1]){
-  cat('Estación ', i, '\n')
-  ind_p1 <- which(pred_q0.95_comp$station[p1] == stations$STAID[i])
-  ind_p2 <- which(pred_q0.95_comp$station[p2] == stations$STAID[i])
-  ind_p3 <- which(pred_q0.95_comp$station[p3] == stations$STAID[i])
-  
-  cat('ind_p1: ', length(ind_p1), '\tind_p2: ', length(ind_p2), 
-      '\tind_p3: ', length(ind_p3), '\n')
-  
-  ks_p1 <- ks.test(pred_q0.95_comp$pred_q0.95[p1][ind_p1], 
-                   pred_q0.95_comp$pred_q0.95_proy[p1][ind_p1])
-  
-  ks_periods[i, 'p1.KS'] <- ks_p1$statistic
-  ks_periods[i, 'p1.KSp'] <- ks_p1$p.value
-  
-  ks_p2 <- ks.test(pred_q0.95_comp$pred_q0.95[p2][ind_p2], 
-                   pred_q0.95_comp$pred_q0.95_proy[p2][ind_p2])
-  
-  ks_periods[i, 'p2.KS'] <- ks_p2$statistic
-  ks_periods[i, 'p2.KSp'] <- ks_p2$p.value
-  
-  ks_p3 <- ks.test(pred_q0.95_comp$pred_q0.95[p3][ind_p3], 
-                   pred_q0.95_comp$pred_q0.95_proy[p3][ind_p3])
-  
-  ks_periods[i, 'p3.KS'] <- ks_p3$statistic
-  ks_periods[i, 'p3.KSp'] <- ks_p3$p.value
-
-}
-
-source('mapa_Spain.R')
-
-ks_p1 <- spain_points(ks_periods$p1.KSp, stations, 'KS Test 1960-1977', 'p-value')
-ks_p2 <- spain_points(ks_periods$p2.KSp, stations, 'KS Test 1978-1995', 'p-value')
-ks_p3 <- spain_points(ks_periods$p3.KSp, stations, 'KS Test 1996-2014', 'p-value')
-
-p_values_periods <- ggpubr::ggarrange(ks_p1, ks_p2, ks_p3, nrow = 1, ncol = 3,
-                                    common.legend = T, legend = 'bottom')
+p_values_periods <- ggpubr::ggarrange(ks_p1, ks_p2, ks_p3, 
+                                      ks_p_ref_ant, ks_p_ref, ks_p_ref_post, 
+                                      nrow = 2, ncol = 3,
+                                      common.legend = T, legend = 'bottom')
 
 ggsave(
   filename = "Proyecciones/p_values_periods.png", 
   plot = p_values_periods, 
   width = 12,
-  height = 5,     
+  height = 5*2,     
   dpi = 300       
 )
 
