@@ -32,6 +32,7 @@ p_ref <- which(year(pred_q0.95_comp$Date) >= '1981'
                & year(pred_q0.95_comp$Date) <= '2010')
 p_ref_post <- which(year(pred_q0.95_comp$Date) >= '2011')
 
+# hacer qqplots para periodos antes y depsues del periodo de referencia
 
 #----DENSIDADES----
 density_plots <- function(data, col1, col2, col3, 
