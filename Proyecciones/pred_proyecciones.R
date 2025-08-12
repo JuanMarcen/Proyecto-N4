@@ -131,7 +131,7 @@ density_plots <- function(data, col1, col2, col3,
   }
 }
 
-png('Proyecciones/comp_dens.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/comp_dens.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -139,7 +139,7 @@ density_plots(pred_q0.95_comp,
               'pred_q0.95_proy_est')
 dev.off()
 
-png('Proyecciones/comp_dens_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/comp_dens_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp_ref, 
               'pred_q0.95', 
@@ -148,7 +148,7 @@ density_plots(pred_q0.95_comp_ref,
 dev.off()
 
 #por meses 
-png('Proyecciones/dens_jun.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_jun.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -158,7 +158,7 @@ density_plots(pred_q0.95_comp,
               month = '06')
 dev.off()
 
-png('Proyecciones/dens_jun_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_jun_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp_ref, 
               'pred_q0.95', 
@@ -168,7 +168,7 @@ density_plots(pred_q0.95_comp_ref,
               month = '06')
 dev.off()
 
-png('Proyecciones/dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -178,7 +178,7 @@ density_plots(pred_q0.95_comp,
               month = '07')
 dev.off()
 
-png('Proyecciones/dens_jul_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_jul_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp_ref, 
               'pred_q0.95', 
@@ -188,7 +188,7 @@ density_plots(pred_q0.95_comp_ref,
               month = '07')
 dev.off()
 
-png('Proyecciones/dens_aug.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_aug.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -198,7 +198,7 @@ density_plots(pred_q0.95_comp,
               month = '08')
 dev.off()
 
-png('Proyecciones/dens_aug_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_aug_ref.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp_ref, 
               'pred_q0.95', 
@@ -209,7 +209,7 @@ density_plots(pred_q0.95_comp_ref,
 dev.off()
 
 #por periodos
-png('Proyecciones/dens_p1.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_p1.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -219,7 +219,7 @@ density_plots(pred_q0.95_comp,
               period = p1)
 dev.off()
 
-png('Proyecciones/dens_p2.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_p2.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -229,7 +229,7 @@ density_plots(pred_q0.95_comp,
               period = p2)
 dev.off()
 
-png('Proyecciones/dens_p3.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_p3.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -239,7 +239,7 @@ density_plots(pred_q0.95_comp,
               period = p3)
 dev.off()
 
-png('Proyecciones/dens_p_ref_ant.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/dens_p_ref_ant.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.95_comp, 
               'pred_q0.95', 
@@ -247,6 +247,16 @@ density_plots(pred_q0.95_comp,
               'pred_q0.95_proy_est',
               type = 'period',
               period = p_ref_ant)
+dev.off()
+
+png('Proyecciones/density_plots/dens_p_ref_post.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp, 
+              'pred_q0.95', 
+              'pred_q0.95_proy',
+              'pred_q0.95_proy_est',
+              type = 'period',
+              period = p_ref_post)
 dev.off()
 
 #----QQPLOTS----
@@ -406,6 +416,15 @@ qqplots(pred_q0.95_comp,
               period = p_ref_ant)
 dev.off()
 
+png('Proyecciones/qqplots/qqplot_p_ref_post.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy',
+        type = 'period',
+        period = p_ref_post)
+dev.off()
+
 ## CON RESIDUOS ESTANDARIZADOS
 png('Proyecciones/qqplots/qqplot_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
@@ -512,6 +531,16 @@ qqplots(pred_q0.95_comp,
         type = 'period',
         period = p_ref_ant)
 dev.off()
+
+png('Proyecciones/qqplots/qqplot_p_ref_post_est.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+qqplots(pred_q0.95_comp, 
+        'pred_q0.95', 
+        'pred_q0.95_proy_est',
+        type = 'period',
+        period = p_ref_post)
+dev.off()
+
 
 #----KS TEST meses Y PERIODOS----
 ks_test_df <- function(data, data_ref, type){
