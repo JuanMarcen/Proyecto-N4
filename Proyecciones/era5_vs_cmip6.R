@@ -172,3 +172,20 @@ spain_points(ks_df_g500$KSp, coord, 'KS Test g500 1981-2010', 'p-values')
 spain_points(ks_df_g700$KSp, coord, 'KS Test g700 1981-2010', 'p-values')
 
 ## Estandarización y comparación
+library(dplyr)
+g500_era5_sc <- g500_era5 %>%
+  mutate(across(2:(ncol(.)-4), scale))
+g500_cmip6_sc <- g500_cmip6 %>%
+  mutate(across(2:(ncol(.)-4), scale))
+g700_era5_sc <- g700_era5 %>%
+  mutate(across(2:(ncol(.)-4), scale))
+g700_cmip6_sc <- g700_cmip6 %>%
+  mutate(across(2:(ncol(.)-4), scale))
+
+ks_df_g500_sc <- ks_test_df(g500_era5_sc, g500_cmip6_sc)
+ks_df_g700_sc <- ks_test_df(g700_era5_sc, g700_cmip6_sc)
+
+spain_points(ks_df_g500_sc$KSp, coord, 'KS Test g500 (est) 1981-2010', 'p-values')
+spain_points(ks_df_g700_sc$KSp, coord, 'KS Test g700 (est) 1981-2010', 'p-values')
+
+apply(g500_cmip6[2:15], 2, mean)
