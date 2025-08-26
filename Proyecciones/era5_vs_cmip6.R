@@ -15,7 +15,7 @@ g700_era5 <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/g700_jja.rds"
 g700_era5[ , 2:ncol(g700_era5)] <- g700_era5[ , 2:ncol(g700_era5)] / 1000
 
 # CMIP6 (closest to original grid of ERA5)
-coord$Grid <- paste0(round(coord$lat),"N.",abs(round(coord$lon)),ifelse(coord$lon>-0.5,"E","W"))
+coord$Grid <- paste0(round(coord$LAT),"N.",abs(round(coord$LON)),ifelse(coord$LON>-0.5,"E","W"))
 tpoints <-coord$Grid
 
 g500_cmip6 <- readRDS("C:/Users/jumar/OneDrive/Escritorio/Github/CMIP6_Iberian/Data/CMIP6/MPI-ESM1-2-HR_r1i1p1f1_zg/historical/Grid/iberian_MPI-ESM1-2-HR_r1i1p1f1_zg_500hPa_1960-2014.rds")
@@ -168,8 +168,8 @@ ks_df_g500 <- ks_test_df(g500_era5, g500_cmip6)
 ks_df_g700 <- ks_test_df(g700_era5, g700_cmip6)
 
 source('mapa_Spain.R')
-spain_points(ks_df_g500$KSp, coord, 'KS Test g500 1981-2010', 'p-values')
-spain_points(ks_df_g700$KSp, coord, 'KS Test g700 1981-2010', 'p-values')
+ks_g500 <- spain_points(ks_df_g500$KSp, coord, 'KS Test g500 (crudo) 1981-2010', 'p-values')
+ks_g700 <- spain_points(ks_df_g700$KSp, coord, 'KS Test g700 (crudo) 1981-2010', 'p-values')
 
 ## Estandarización y comparación
 library(dplyr)
@@ -185,7 +185,16 @@ g700_cmip6_sc <- g700_cmip6 %>%
 ks_df_g500_sc <- ks_test_df(g500_era5_sc, g500_cmip6_sc)
 ks_df_g700_sc <- ks_test_df(g700_era5_sc, g700_cmip6_sc)
 
-spain_points(ks_df_g500_sc$KSp, coord, 'KS Test g500 (est) 1981-2010', 'p-values')
-spain_points(ks_df_g700_sc$KSp, coord, 'KS Test g700 (est) 1981-2010', 'p-values')
+ks_g500_sc <- spain_points(ks_df_g500_sc$KSp, coord, 'KS Test g500 (est) 1981-2010', 'p-values')
+ks_g700_sc <- spain_points(ks_df_g700_sc$KSp, coord, 'KS Test g700 (est) 1981-2010', 'p-values')
 
-apply(g500_cmip6[2:15], 2, mean)
+p_values_ref <- ggpubr::ggarrange(ks_g500, ks_g700, ks_g500_sc, ks_g700_sc, 
+                                  nrow = 2, ncol = 2,
+                                        common.legend = T, legend = 'bottom')
+ggsave(
+  filename = "Proyecciones/era5_vs_cmip6/p_values_ref.png", 
+  plot = p_values_ref, 
+  width = 8,   
+  height = 5,     
+  dpi = 300
+)
