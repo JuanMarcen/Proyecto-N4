@@ -6,6 +6,7 @@ rm(list=ls())
 library(lubridate)
 #coordinates of grid
 coord <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/coord.rds")
+colnames(coord) <- c('LAT', 'LON', 'station')
 
 # ERA5 (already done)
 g500_era5 <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/g500_jja.rds")
@@ -147,3 +148,27 @@ g700_cmip6 <- anomalies(g700_cmip6)
 
 
 #----KS TEST----
+ks_test_df <- function(df_era5, df_cmip6){
+  ks_df <- data.frame(
+    station = coord$Grid
+  )
+  
+  for(i in 2:(ncol(df_era5)-4)){
+    suppressWarnings(
+      ks <- ks.test(df_era5[, i], df_cmip6[, i])
+    )
+    ks_df[i - 1, 'KS'] <- ks$statistic
+    ks_df[i - 1, 'KSp'] <- ks$p.value
+  }
+  
+  return(ks_df)
+}
+
+ks_df_g500 <- ks_test_df(g500_era5, g500_cmip6)
+ks_df_g700 <- ks_test_df(g700_era5, g700_cmip6)
+
+source('mapa_Spain.R')
+spain_points(ks_df_g500$KSp, coord, 'KS Test g500 1981-2010', 'p-values')
+spain_points(ks_df_g700$KSp, coord, 'KS Test g700 1981-2010', 'p-values')
+
+## Estandarización y comparación

@@ -8,8 +8,8 @@ library(viridis)
 limits <- st_transform(
   as(
     SpatialPointsDataFrame(
-      coords = data.frame(X = c(-10, 4), Y = c(35.5, 44)), 
-      data = data.frame(X = c(-10, 4), Y = c(35.5, 44)),
+      coords = data.frame(X = c(-10.5, 6), Y = c(34, 46)), 
+      data = data.frame(X = c(-10.5, 6), Y = c(34, 46)),
       proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")),
     'sf'
   ),
@@ -71,12 +71,19 @@ spain_points <- function(values, stations, title, title_legend){
           axis.text.y = element_text(size = 6, angle = 90),
           axis.title = element_text(size = 10, face = "bold"))  +
     
-    scale_color_gradientn(
-      colors = c("#2c0072", "#ff6ec7", "#ffe680", "#fdae61", "#f0f0f0"),
-      values = scales::rescale(c(0, 0.05, 0.10, 0.20, 0.30)),
+    # scale_color_gradientn(
+    #   colors = c("#2c0072", "#ff6ec7", "#ffe680", "#fdae61", "#f0f0f0"),
+    #   values = scales::rescale(c(0, 0.05, 0.10, 0.20, 0.30)),
+    #   name = title_legend,
+    #   limits = c(0, 0.30),
+    #   breaks = seq(0, 0.30, 0.05)
+    # ) +
+    
+    scale_color_viridis_c(
+      option = "plasma",  # también puedes probar "plasma", "cividis", "viridis"
       name = title_legend,
-      limits = c(0, 0.30),
-      breaks = seq(0, 0.30, 0.05)
+      limits = c(0, 1),  # porque quieres de 0 a 1
+      breaks = seq(0, 1, 0.1)
     ) +
     
     theme(
