@@ -153,12 +153,37 @@ ks_test_df <- function(df_era5, df_cmip6){
     station = coord$Grid
   )
   
+  # same index for months for every grid point
+  jun <- which(month(df_era5$Date) == 6)
+  jul <- which(month(df_era5$Date) == 7)
+  aug <- which(month(df_era5$Date) == 8)
+  
   for(i in 2:(ncol(df_era5)-4)){
     suppressWarnings(
       ks <- ks.test(df_era5[, i], df_cmip6[, i])
     )
     ks_df[i - 1, 'KS'] <- ks$statistic
     ks_df[i - 1, 'KSp'] <- ks$p.value
+    
+    #months
+    suppressWarnings(
+      ks <- ks.test(df_era5[jun, i], df_cmip6[jun, i])
+    )
+    ks_df[i - 1, 'jun.KS'] <- ks$statistic
+    ks_df[i - 1, 'jun.KSp'] <- ks$p.value
+    
+    suppressWarnings(
+      ks <- ks.test(df_era5[jul, i], df_cmip6[jul, i])
+    )
+    ks_df[i - 1, 'jul.KS'] <- ks$statistic
+    ks_df[i - 1, 'jul.KSp'] <- ks$p.value
+    
+    suppressWarnings(
+      ks <- ks.test(df_era5[aug, i], df_cmip6[aug, i])
+    )
+    ks_df[i - 1, 'aug.KS'] <- ks$statistic
+    ks_df[i - 1, 'aug.KSp'] <- ks$p.value
+    
   }
   
   return(ks_df)
@@ -169,7 +194,13 @@ ks_df_g700 <- ks_test_df(g700_era5, g700_cmip6)
 
 source('mapa_Spain.R')
 ks_g500 <- spain_points(ks_df_g500$KSp, coord, 'KS Test g500 (crudo) 1981-2010', 'p-values')
+ks_g500_jun <- spain_points(ks_df_g500$jun.KSp, coord, 'KS Test June g500 (crudo) 1981-2010', 'p-values')
+ks_g500_jul <- spain_points(ks_df_g500$jul.KSp, coord, 'KS Test July g500 (crudo) 1981-2010', 'p-values')
+ks_g500_aug <- spain_points(ks_df_g500$aug.KSp, coord, 'KS Test August g500 (crudo) 1981-2010', 'p-values')
 ks_g700 <- spain_points(ks_df_g700$KSp, coord, 'KS Test g700 (crudo) 1981-2010', 'p-values')
+ks_g700_jun <- spain_points(ks_df_g700$jun.KSp, coord, 'KS Test June g700 (crudo) 1981-2010', 'p-values')
+ks_g700_jul <- spain_points(ks_df_g700$jul.KSp, coord, 'KS Test July g700 (crudo) 1981-2010', 'p-values')
+ks_g700_aug <- spain_points(ks_df_g700$aug.KSp, coord, 'KS Test August g700 (crudo) 1981-2010', 'p-values')
 
 ## Estandarización y comparación
 library(dplyr)
@@ -186,7 +217,13 @@ ks_df_g500_sc <- ks_test_df(g500_era5_sc, g500_cmip6_sc)
 ks_df_g700_sc <- ks_test_df(g700_era5_sc, g700_cmip6_sc)
 
 ks_g500_sc <- spain_points(ks_df_g500_sc$KSp, coord, 'KS Test g500 (est) 1981-2010', 'p-values')
+ks_g500_sc_jun <- spain_points(ks_df_g500_sc$jun.KSp, coord, 'KS Test g500 June (est) 1981-2010', 'p-values')
+ks_g500_sc_jul <- spain_points(ks_df_g500_sc$jul.KSp, coord, 'KS Test g500 July (est) 1981-2010', 'p-values')
+ks_g500_sc_aug <- spain_points(ks_df_g500_sc$aug.KSp, coord, 'KS Test g500 August (est) 1981-2010', 'p-values')
 ks_g700_sc <- spain_points(ks_df_g700_sc$KSp, coord, 'KS Test g700 (est) 1981-2010', 'p-values')
+ks_g700_sc_jun <- spain_points(ks_df_g700_sc$jun.KSp, coord, 'KS Test g700 June (est) 1981-2010', 'p-values')
+ks_g700_sc_jul <- spain_points(ks_df_g700_sc$jul.KSp, coord, 'KS Test g700 July (est) 1981-2010', 'p-values')
+ks_g700_sc_aug <- spain_points(ks_df_g700_sc$aug.KSp, coord, 'KS Test g700 August (est) 1981-2010', 'p-values')
 
 p_values_ref <- ggpubr::ggarrange(ks_g500, ks_g700, ks_g500_sc, ks_g700_sc, 
                                   nrow = 2, ncol = 2,
@@ -194,6 +231,30 @@ p_values_ref <- ggpubr::ggarrange(ks_g500, ks_g700, ks_g500_sc, ks_g700_sc,
 ggsave(
   filename = "Proyecciones/era5_vs_cmip6/p_values_ref.png", 
   plot = p_values_ref, 
+  width = 8,   
+  height = 10,     
+  dpi = 300
+)
+
+p_values_g500_month <- ggpubr::ggarrange(ks_g500_jun, ks_g500_jul, ks_g500_aug, 
+                                         ks_g500_sc_jun, ks_g500_sc_jul, ks_g500_sc_aug,
+                                      nrow = 2, ncol = 3,
+                                      common.legend = T, legend = 'bottom')
+ggsave(
+  filename = "Proyecciones/era5_vs_cmip6/p_values_g500_month.png", 
+  plot = p_values_g500_month, 
+  width = 12,   
+  height = 10,     
+  dpi = 300
+)
+
+p_values_g700_month <- ggpubr::ggarrange(ks_g700_jun, ks_g700_jul, ks_g700_aug, 
+                                         ks_g700_sc_jun, ks_g700_sc_jul, ks_g700_sc_aug,
+                                         nrow = 2, ncol = 3,
+                                         common.legend = T, legend = 'bottom')
+ggsave(
+  filename = "Proyecciones/era5_vs_cmip6/p_values_g700_month.png", 
+  plot = p_values_g700_month, 
   width = 8,   
   height = 10,     
   dpi = 300
