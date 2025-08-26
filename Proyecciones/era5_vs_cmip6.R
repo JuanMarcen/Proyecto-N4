@@ -195,6 +195,6 @@ ggsave(
   filename = "Proyecciones/era5_vs_cmip6/p_values_ref.png", 
   plot = p_values_ref, 
   width = 8,   
-  height = 5,     
+  height = 10,     
   dpi = 300
 )
