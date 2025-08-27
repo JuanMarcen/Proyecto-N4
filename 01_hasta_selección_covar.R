@@ -474,46 +474,46 @@ xtable(errores_q0.90, digits = c(0, rep(3, ncol(errores_q0.90))))
 xtable(errores_q0.75, digits = c(0, rep(3, ncol(errores_q0.75))))
 xtable(errores_q0.75, digits = c(0, rep(3, ncol(errores_q0.75))))
 
-# pearson
-errores_p_q0.95 <- vector("list", length(prop)*length(k))
-i <- 1
-for (kk in k){
-  for (p in prop){
-    errores_p_q0.95[[i]] <- error_modelo(modelos_proyecto_q0.95, tau = 0.95, k = kk, p = p, metodo = 'pearson')
-    i <- i + 1
-  }
-}
-
-ciudades_p_q0.95 <- sapply(errores_p_q0.95, function(x) x[[8]])
-ciudades_p_q0.95
-
-# spearman
-errores_s_q0.95 <- vector("list", length(prop)*length(k))
-i <- 1
-for (kk in k){
-  for (p in prop){
-    errores_s_q0.95[[i]] <- error_modelo(modelos_proyecto_q0.95, tau = 0.95, k = kk, p = p, metodo = 'spearman')
-    i <- i+1
-  }
-}
-
-ciudades_s_q0.95 <- sapply(errores_s_q0.95, function(x) x[[8]])
-ciudades_s_q0.95
-
-# como data frames
-# pearson
-errores_df_p_q0.95 <- do.call(rbind, lapply(errores_p_q0.95, function(x) as.numeric(x[-length(x)]))) #quito vars, para mostrar resultado mejor
-colnames(errores_df_p_q0.95) <- names(errores_p_q0.95[[1]])[-length(errores_p_q0.95[[1]])]  # Mantiene los nombres correctos
-errores_df_p_q0.95 <- as.data.frame(errores_df_p_q0.95)
-errores_df_p_q0.95$metodo <- rep('pearson', length = length(errores_p_q0.95))
-errores_df_p_q0.95$ciudad <- ciudades_p_q0.95
-
-#spearman
-errores_df_s_q0.95 <- do.call(rbind, lapply(errores_s_q0.95, function(x) as.numeric(x[-length(x)]))) #quito vars, para mostrar resultado mejor
-colnames(errores_df_s_q0.95) <- names(errores_s_q0.95[[1]])[-length(errores_s_q0.95[[1]])]  # Mantiene los nombres correctos
-errores_df_s_q0.95 <- as.data.frame(errores_df_s_q0.95)
-errores_df_s_q0.95$metodo <- rep('spearman', length=length(errores_s_q0.95))
-errores_df_s_q0.95$ciudad <- ciudades_s_q0.95
+# # pearson
+# errores_p_q0.95 <- vector("list", length(prop)*length(k))
+# i <- 1
+# for (kk in k){
+#   for (p in prop){
+#     errores_p_q0.95[[i]] <- error_modelo(modelos_proyecto_q0.95, tau = 0.95, k = kk, p = p, metodo = 'pearson')
+#     i <- i + 1
+#   }
+# }
+# 
+# ciudades_p_q0.95 <- sapply(errores_p_q0.95, function(x) x[[8]])
+# ciudades_p_q0.95
+# 
+# # spearman
+# errores_s_q0.95 <- vector("list", length(prop)*length(k))
+# i <- 1
+# for (kk in k){
+#   for (p in prop){
+#     errores_s_q0.95[[i]] <- error_modelo(modelos_proyecto_q0.95, tau = 0.95, k = kk, p = p, metodo = 'spearman')
+#     i <- i+1
+#   }
+# }
+# 
+# ciudades_s_q0.95 <- sapply(errores_s_q0.95, function(x) x[[8]])
+# ciudades_s_q0.95
+# 
+# # como data frames
+# # pearson
+# errores_df_p_q0.95 <- do.call(rbind, lapply(errores_p_q0.95, function(x) as.numeric(x[-length(x)]))) #quito vars, para mostrar resultado mejor
+# colnames(errores_df_p_q0.95) <- names(errores_p_q0.95[[1]])[-length(errores_p_q0.95[[1]])]  # Mantiene los nombres correctos
+# errores_df_p_q0.95 <- as.data.frame(errores_df_p_q0.95)
+# errores_df_p_q0.95$metodo <- rep('pearson', length = length(errores_p_q0.95))
+# errores_df_p_q0.95$ciudad <- ciudades_p_q0.95
+# 
+# #spearman
+# errores_df_s_q0.95 <- do.call(rbind, lapply(errores_s_q0.95, function(x) as.numeric(x[-length(x)]))) #quito vars, para mostrar resultado mejor
+# colnames(errores_df_s_q0.95) <- names(errores_s_q0.95[[1]])[-length(errores_s_q0.95[[1]])]  # Mantiene los nombres correctos
+# errores_df_s_q0.95 <- as.data.frame(errores_df_s_q0.95)
+# errores_df_s_q0.95$metodo <- rep('spearman', length=length(errores_s_q0.95))
+# errores_df_s_q0.95$ciudad <- ciudades_s_q0.95
 
 
 
