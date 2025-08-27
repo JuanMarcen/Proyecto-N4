@@ -278,6 +278,8 @@ formula <- as.formula(
               collapse = '+')))
 
 modelos_proyecto_q0.95 <- modelos_tau(0.95, formula, df_final)
+modelos_proyecto_q0.90 <- modelos_tau(0.9, formula, df_final)
+modelos_proyecto_q0.75 <- modelos_tau(0.75, formula, df_final)
 #save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.95, file = 'data.RData')
 
 #----Selección covariables----
