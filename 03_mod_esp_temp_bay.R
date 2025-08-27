@@ -39,49 +39,156 @@ formula_q0.75 <- update(formula_q0.75, .~. + elev + dist)
 
 #----Starting points----
 #obtencion de parametros de inicio
-start_beta_q0.95 <- apply(
-  modelos_finales_q0.95[,3:(ncol(modelos_finales_q0.95) - 1)],
-  MARGIN = 2, FUN = mean)
+starting_values <- function(modelos_finales){
+  start_beta <- apply(
+    modelos_finales[,3:(ncol(modelos_finales) - 1)],
+    MARGIN = 2, FUN = mean)
+  
+  elev_sc <- scale(stations_dist$HGHT)
+  dist_sc <- scale(stations_dist$DIST)
+  mod <- lm(modelos_finales$intercept ~ elev_sc + dist_sc)
+  
+  elev_inic <- coef(mod)[2]
+  dist_inic <- coef(mod)[3]
+  
+  inic_procesos <- as.matrix(
+    cbind(
+      mod$residuals,
+      sweep(modelos_finales[,4:(ncol(modelos_finales) - 1)],
+            2, start_beta[-1])))
+  inic_procesos <- inic_procesos + rnorm(40 * (ncol(modelos_finales)-3), 0, 0.1)
+  
+  start_beta <- c(start_beta, elev_inic, dist_inic)
+  
+  return(list(
+    start_beta = start_beta,
+    inic_procesos = inic_procesos
+  ))
+}
 
-elev_sc <- scale(stations_dist$HGHT)
-dist_sc <- scale(stations_dist$DIST)
-mod_q0.95 <- lm(modelos_finales_q0.95$intercept ~ elev_sc + dist_sc)
+start_beta_q0.95 <- starting_values(modelos_finales_q0.95)[['start_beta']]
+inic_procesos_q0.95 <- starting_values(modelos_finales_q0.95)[['inic_procesos']]
 
-elev_inic_q0.95 <- coef(mod_q0.95)[2]
-dist_inic_q0.95 <- coef(mod_q0.95)[3]
+start_beta_q0.90 <- starting_values(modelos_finales_q0.90)[['start_beta']]
+inic_procesos_q0.90 <- starting_values(modelos_finales_q0.90)[['inic_procesos']]
 
-inic_procesos_q0.95 <- as.matrix(
-  cbind(
-    mod_q0.95$residuals,
-    sweep(modelos_finales_q0.95[,4:(ncol(modelos_finales_q0.95) - 1)],
-          2, start_beta_q0.95[-1])))
-inic_procesos_q0.95 <- inic_procesos_q0.95 + rnorm(40*18, 0, 0.1)
+start_beta_q0.75 <- starting_values(modelos_finales_q0.75)[['start_beta']]
+inic_procesos_q0.75 <- starting_values(modelos_finales_q0.75)[['inic_procesos']]
 
-#----Modelo----
-mod_q0.95_bay<-spTm(formula,
-                       data = v_q0.95,
-                       method = 'q',
-                       quantile = 0.95,
-                       coords = coords_km,
-                       v = as.matrix(cbind(1,v_q0.95[4:20])),
-                       priors = list(
-                         "beta" = list(M = rep(0, 20), P = 0.0001 * 
-                                         diag(20)),
-                         "sigma" = c(0.1, 0.1),
-                         "phi" = c(38, 7400),
-                         "mu" = c(0, 0.0001)),
-                       starting = list(
-                         "beta" = c(start_beta_q0.95,
-                                    elev_inic_q0.95,
-                                    dist_inic_q0.95),
-                         "sigma" = 1,
-                         "alpha" = inic_procesos_q0.95,
-                         "hp" = c("mu" = 0, "sigma" = 1, "phi" = 3 / 600)),
-                       n.samples = 100000,
-                       n.burnin = 100000,
-                       n.thin = 1000,
-                       n.report = 1000
-)
+# start_beta_q0.95 <- apply(
+#   modelos_finales_q0.95[,3:(ncol(modelos_finales_q0.95) - 1)],
+#   MARGIN = 2, FUN = mean)
+# 
+# elev_sc <- scale(stations_dist$HGHT)
+# dist_sc <- scale(stations_dist$DIST)
+# mod_q0.95 <- lm(modelos_finales_q0.95$intercept ~ elev_sc + dist_sc)
+# 
+# elev_inic_q0.95 <- coef(mod_q0.95)[2]
+# dist_inic_q0.95 <- coef(mod_q0.95)[3]
+# 
+# inic_procesos_q0.95 <- as.matrix(
+#   cbind(
+#     mod_q0.95$residuals,
+#     sweep(modelos_finales_q0.95[,4:(ncol(modelos_finales_q0.95) - 1)],
+#           2, start_beta_q0.95[-1])))
+# inic_procesos_q0.95 <- inic_procesos_q0.95 + rnorm(40*18, 0, 0.1)
+
+
+#----Modelos----
+mod_bay <- function(formula, data, tau, vars, 
+                    coords, start_beta, inic_procesos,
+                    n.samples, n.burnin, n.thin, n.report){
+  
+  ind <- length(vars) + 3
+  
+  mod<-spTm(formula,
+            data = data,
+            method = 'q',
+            quantile = tau,
+            coords = coords,
+            v = as.matrix(cbind(1,data[4:ind])),
+            priors = list(
+              "beta" = list(M = rep(0, ind), P = 0.0001 * 
+                              diag(ind)),
+              "sigma" = c(0.1, 0.1),
+              "phi" = c(38, 7400),
+              "mu" = c(0, 0.0001)),
+            starting = list(
+              "beta" = start_beta,
+              "sigma" = 1,
+              "alpha" = inic_procesos,
+              "hp" = c("mu" = 0, "sigma" = 1, "phi" = 3 / 600)),
+            n.samples = n.samples,
+            n.burnin = n.burnin,
+            n.thin = n.thin,
+            n.report = n.report
+  )
+  
+  return(mod)
+}
+
+mod_q0.95_bay <- mod_bay(
+  formula = formula, 
+  data = v_q0.95, 
+  tau = 0.95, 
+  vars = vars, 
+  coords = coords_km, 
+  start_beta = start_beta_q0.95, 
+  inic_procesos = inic_procesos_q0.95, 
+  n.samples = 100, 
+  n.burnin = 1, 
+  n.thin = 1, 
+  n.report = 10)
+
+mod_q0.90_bay <- mod_bay(
+  formula = formula_q0.90, 
+  data = v_q0.90, 
+  tau = 0.90, 
+  vars = vars_q0.90, 
+  coords = coords_km, 
+  start_beta = start_beta_q0.90, 
+  inic_procesos = inic_procesos_q0.90, 
+  n.samples = 100, 
+  n.burnin = 1, 
+  n.thin = 1, 
+  n.report = 10)
+
+mod_q0.75_bay <- mod_bay(
+  formula = formula_q0.75, 
+  data = v_q0.75, 
+  tau = 0.95, 
+  vars = vars_q0.75, 
+  coords = coords_km, 
+  start_beta = start_beta_q0.75, 
+  inic_procesos = inic_procesos_q0.75, 
+  n.samples = 100, 
+  n.burnin = 1, 
+  n.thin = 1, 
+  n.report = 10)
+
+
+# mod_q0.95_bay<-spTm(formula,
+#                        data = v_q0.95,
+#                        method = 'q',
+#                        quantile = 0.95,
+#                        coords = coords_km,
+#                        v = as.matrix(cbind(1,v_q0.95[4:20])),
+#                        priors = list(
+#                          "beta" = list(M = rep(0, 20), P = 0.0001 * 
+#                                          diag(20)),
+#                          "sigma" = c(0.1, 0.1),
+#                          "phi" = c(38, 7400),
+#                          "mu" = c(0, 0.0001)),
+#                        starting = list(
+#                          "beta" = start_beta_q0.95,
+#                          "sigma" = 1,
+#                          "alpha" = inic_procesos_q0.95,
+#                          "hp" = c("mu" = 0, "sigma" = 1, "phi" = 3 / 600)),
+#                        n.samples = 100000,
+#                        n.burnin = 100000,
+#                        n.thin = 1000,
+#                        n.report = 1000
+# )
 
 
 # save(Y, df_final, stations, stations_dist, 
@@ -91,8 +198,22 @@ mod_q0.95_bay<-spTm(formula,
 #      formula, mod_q0.95_bay, elev_sc, dist_sc,
 #      file = 'data.RData')
 
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.90,
+     vars_q0.90, v_q0.90,
+     modelos_finales_q0.90,
+     formula_q0.90, mod_q0.90_bay, elev_sc, dist_sc,
+     file = 'data_q0.95/data.RData')
+
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.75, 
+     vars_q0.75, v_q0.75,
+     modelos_finales_q0.75,
+     formula_q0.75, mod_q0.75_bay, elev_sc, dist_sc,
+     file = 'data_q0.75/data.RData')
+
 # nombres de columna a poly
-# esto es util en el caso de realizar proyecciones en un futuro
+# esto es util en el caso de realizar proyecciones en un futuro (IGNORAR DE MOMENTO)
 quad_vars <- gsub("^I\\((.*)\\^2\\)$", "\\1", 
                   grep("^I\\(.*\\^2\\)$", vars, value = TRUE))
 

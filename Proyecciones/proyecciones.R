@@ -251,7 +251,7 @@ for (j in 30:39){
 }
 
 # guardado de solo las variables que se ajustan en el modelo
-vars <- readRDS('vars.rds')
+vars <- readRDS('data_q0.95/vars.rds')
 
 # Creación de fórmula. Si aparece al cuadrado y normal como polinomio ortogonal
 generar_formula_poly <- function(vars) {
@@ -291,8 +291,8 @@ vars_finales <- generar_formula_poly(vars)
 columnas <- list()
 
 # ESCALAR SEGÚN EL ESCALADO UTILIZADO EN EL MODELO AJUSTADO
-escalado_info <- readRDS("escalado_info.rds")
-df_era5 <- readRDS('df_era5.rds')
+escalado_info <- readRDS("data_q0.95/escalado_info.rds")
+df_era5 <- readRDS('data_q0.95/df_era5.rds')
 df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
 
 for (var in vars_finales) {
@@ -340,6 +340,7 @@ v_q0.95_proy$Date <- df_final_proy$Date
 v_q0.95_proy$station <- as.integer(df_final_proy$station)
 v_q0.95_proy$Y <- df_final_proy$Y
 v_q0.95_proy <- v_q0.95_proy[, c((ncol(v_q0.95_proy)-2):ncol(v_q0.95_proy), 1:(ncol(v_q0.95_proy)-3))]
+
 
 # extra escalado (Jorge)
 sigmas <- data.frame(
