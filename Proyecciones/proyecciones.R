@@ -4,6 +4,7 @@ rm(list=ls())
 stations <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/stations.rds")
 stations_dist <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/stations_dist.rds")
 
+#----Dataframe CMIP6----
 # obtener estaciones más cercanas del MPI al ERA5
 # código de Elsa modifcado
 stations$Grid <- paste0(round(stations$LAT),"N.",abs(round(stations$LON)),ifelse(stations$LON>-0.5,"E","W"))
@@ -250,7 +251,7 @@ for (j in 30:39){
   df_final_proy[,paste0('I(',var,'^2)')] <- df_final_proy[,var]^2
 }
 
-
+#----Dataframes finales----
 # guardado de solo las variables que se ajustan en el modelo
 escalado_info <- readRDS("data_q0.95/escalado_info.rds")
 df_era5 <- readRDS('data_q0.95/df_era5.rds')
@@ -421,7 +422,7 @@ save(stations,
      v_q0.95_proy_est,
      Y,
      vars,
-     file = 'proyecciones.RData')
+     file = 'data_q0.95/proyecciones.RData')
 
 save(stations,
      stations_dist,
@@ -431,7 +432,7 @@ save(stations,
      v_q0.90_proy_est,
      Y,
      vars_q0.90,
-     file = 'proyecciones.RData')
+     file = 'data_q0.90/proyecciones.RData')
 
 save(stations,
      stations_dist,
@@ -441,4 +442,4 @@ save(stations,
      v_q0.75_proy_est,
      Y,
      vars_q0.75,
-     file = 'proyecciones.RData')
+     file = 'data_q0.75/proyecciones.RData')
