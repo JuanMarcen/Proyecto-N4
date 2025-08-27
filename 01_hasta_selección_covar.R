@@ -469,12 +469,12 @@ errores_q0.95 <- errores_modelo_df(prop, k, modelos_proyecto_q0.95, tau = 0.95)
 errores_q0.90 <- errores_modelo_df(prop, k, modelos_proyecto_q0.90, tau = 0.90)
 errores_q0.75 <- errores_modelo_df(prop, k, modelos_proyecto_q0.75, tau = 0.75)
 
-save(Y, df_final, stations, stations_dist, 
-     modelos_proyecto_q0.90, errores_q0.90,
-     file = 'data_q0.90/data.RData')
-save(Y, df_final, stations, stations_dist, 
-     modelos_proyecto_q0.75, errores_q0.75, 
-     file = 'data_q0.75/data.RData')
+# save(Y, df_final, stations, stations_dist, 
+#      modelos_proyecto_q0.90, errores_q0.90,
+#      file = 'data_q0.90/data.RData')
+# save(Y, df_final, stations, stations_dist, 
+#      modelos_proyecto_q0.75, errores_q0.75, 
+#      file = 'data_q0.75/data.RData')
 
 library(xtable)
 xtable(errores_q0.95[['pearson']], digits = c(0, rep(3, ncol(errores_q0.95[['pearson']]))))
