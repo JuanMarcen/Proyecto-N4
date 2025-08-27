@@ -281,11 +281,22 @@ modelos_proyecto_q0.95 <- modelos_tau(0.95, formula, df_final)
 modelos_proyecto_q0.90 <- modelos_tau(0.9, formula, df_final)
 modelos_proyecto_q0.75 <- modelos_tau(0.75, formula, df_final)
 #save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.95, file = 'data.RData')
+save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.90, file = 'data_q0.90/data.RData')
+save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.75, file = 'data_q0.75/data.RData')
 
 #----Selección covariables----
 modelos_proyecto_q0.95$stations <- stations$STAID
 modelos_proyecto_q0.95$NAME2 <- stations$NAME2
 modelos_proyecto_q0.95 <- modelos_proyecto_q0.95[,c(ncol(modelos_proyecto_q0.95)-1, ncol(modelos_proyecto_q0.95), 1:(ncol(modelos_proyecto_q0.95)-2))]
+
+modelos_proyecto_q0.90$stations <- stations$STAID
+modelos_proyecto_q0.90$NAME2 <- stations$NAME2
+modelos_proyecto_q0.90 <- modelos_proyecto_q0.90[,c(ncol(modelos_proyecto_q0.90)-1, ncol(modelos_proyecto_q0.90), 1:(ncol(modelos_proyecto_q0.90)-2))]
+
+modelos_proyecto_q0.75$stations <- stations$STAID
+modelos_proyecto_q0.75$NAME2 <- stations$NAME2
+modelos_proyecto_q0.75 <- modelos_proyecto_q0.75[,c(ncol(modelos_proyecto_q0.75)-1, ncol(modelos_proyecto_q0.75), 1:(ncol(modelos_proyecto_q0.75)-2))]
+
 
 met_ajuste <- function(mod, mod_nulo){
   return(1 - mod$rho / mod_nulo$rho)
@@ -402,8 +413,58 @@ error_modelo<-function(modelos, tau, k, p, metodo){
   ))
 }
 
+errores_modelo_df <- function(prop, k, modelos, tau){
+  # pearson
+  errores_p <- vector("list", length(prop)*length(k))
+  i <- 1
+  for (kk in k){
+    for (p in prop){
+      errores_p[[i]] <- error_modelo(modelos, tau = tau, k = kk, p = p, metodo = 'pearson')
+      i <- i + 1
+    }
+  }
+  
+  ciudades_p <- sapply(errores_p, function(x) x[[8]])
+  ciudades_p
+  
+  # spearman
+  errores_s <- vector("list", length(prop)*length(k))
+  i <- 1
+  for (kk in k){
+    for (p in prop){
+      errores_s[[i]] <- error_modelo(modelos, tau = tau, k = kk, p = p, metodo = 'spearman')
+      i <- i + 1
+    }
+  }
+  
+  ciudades_s <- sapply(errores_s, function(x) x[[8]])
+  ciudades_s
+  
+  # como data frames
+  # pearson
+  errores_df_p <- do.call(rbind, lapply(errores_p, function(x) as.numeric(x[-length(x)]))) #quito vars, para mostrar resultado mejor
+  colnames(errores_df_p) <- names(errores_p[[1]])[-length(errores_p[[1]])]  # Mantiene los nombres correctos
+  errores_df_p <- as.data.frame(errores_df_p)
+  errores_df_p$metodo <- rep('pearson', length = length(errores_p))
+  errores_df_p$ciudad <- ciudades_p
+  
+  #spearman
+  errores_df_s <- do.call(rbind, lapply(errores_s, function(x) as.numeric(x[-length(x)]))) #quito vars, para mostrar resultado mejor
+  colnames(errores_df_s) <- names(errores_s[[1]])[-length(errores_s[[1]])]  # Mantiene los nombres correctos
+  errores_df_s <- as.data.frame(errores_df_s)
+  errores_df_s$metodo <- rep('spearman', length=length(errores_s))
+  errores_df_s$ciudad <- ciudades_s
+  
+  return(list(pearson = errores_df_p, spearman = errores_df_s))
+}
+
 prop <- seq(80/100, 95/100, by=0.05)
 k<-c(2, 3)
+
+# dataframe errores por cuantil
+errores_q0.95 <- errores_modelo_df(prop, k, modelos_proyecto_q0.95, tau = 0.95)
+errores_q0.90 <- errores_modelo_df(prop, k, modelos_proyecto_q0.90, tau = 0.90)
+errores_q0.75 <- errores_modelo_df(prop, k, modelos_proyecto_q0.75, tau = 0.75)
 
 # pearson
 errores_p_q0.95 <- vector("list", length(prop)*length(k))
@@ -438,8 +499,6 @@ colnames(errores_df_p_q0.95) <- names(errores_p_q0.95[[1]])[-length(errores_p_q0
 errores_df_p_q0.95 <- as.data.frame(errores_df_p_q0.95)
 errores_df_p_q0.95$metodo <- rep('pearson', length = length(errores_p_q0.95))
 errores_df_p_q0.95$ciudad <- ciudades_p_q0.95
-
-
 
 #spearman
 errores_df_s_q0.95 <- do.call(rbind, lapply(errores_s_q0.95, function(x) as.numeric(x[-length(x)]))) #quito vars, para mostrar resultado mejor
