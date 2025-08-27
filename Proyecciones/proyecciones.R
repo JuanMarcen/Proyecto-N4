@@ -202,31 +202,31 @@ for (i in 1:dim(stations)[1]){
 }
 
 # estandarizadas segun los lm 
-df_era5 <- readRDS('df_era5.rds')
-df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
-
-for (i in 1:dim(stations)[1]){
-  ind <- which(df_proy$station == stations$STAID[i])
-  ind_jja <- which(df_proy$t[ind] >= 22 & df_proy$t[ind] <= 51 & df_proy$l[ind] >= 152)
-  
-  for (j in 4:13){
-    var <- names(df_proy)[j]
-    formula <- as.formula(paste(var, "~ s.1 + c.1"))
-    mod <- lm(formula, data = df_proy[ind,], subset = ind_jja)
-    preds <- predict(mod, newdata = data.frame(
-      c.1 = df_proy$c.1[ind],
-      s.1 = df_proy$s.1[ind]
-    ))
-    
-    res <- df_proy[ind, var] - preds
-    #print(sum(preds[ind_jja] - mod$fitted.values <= 1e-10))
-    
-    mod2<- lm(formula, data = df_era5[ind,], subset = ind_jja)
-    #guardado de estandarizado
-    df_proy[ind,var] <- res * summary(mod2)$sigma / summary(mod)$sigma
-  }
-  
-}
+# df_era5 <- readRDS('df_era5.rds')
+# df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
+# 
+# for (i in 1:dim(stations)[1]){
+#   ind <- which(df_proy$station == stations$STAID[i])
+#   ind_jja <- which(df_proy$t[ind] >= 22 & df_proy$t[ind] <= 51 & df_proy$l[ind] >= 152)
+#   
+#   for (j in 4:13){
+#     var <- names(df_proy)[j]
+#     formula <- as.formula(paste(var, "~ s.1 + c.1"))
+#     mod <- lm(formula, data = df_proy[ind,], subset = ind_jja)
+#     preds <- predict(mod, newdata = data.frame(
+#       c.1 = df_proy$c.1[ind],
+#       s.1 = df_proy$s.1[ind]
+#     ))
+#     
+#     res <- df_proy[ind, var] - preds
+#     #print(sum(preds[ind_jja] - mod$fitted.values <= 1e-10))
+#     
+#     mod2<- lm(formula, data = df_era5[ind,], subset = ind_jja)
+#     #guardado de estandarizado
+#     df_proy[ind,var] <- res * summary(mod2)$sigma / summary(mod)$sigma
+#   }
+#   
+# }
 
 
 # cuadrado de anomalias
@@ -250,8 +250,29 @@ for (j in 30:39){
   df_final_proy[,paste0('I(',var,'^2)')] <- df_final_proy[,var]^2
 }
 
+
 # guardado de solo las variables que se ajustan en el modelo
+escalado_info <- readRDS("data_q0.95/escalado_info.rds")
+df_era5 <- readRDS('data_q0.95/df_era5.rds')
+df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
 vars <- readRDS('data_q0.95/vars.rds')
+load('data_q0.90/data.RData')
+load('data_q0.75/data.RData')
+
+rm(list = setdiff(ls(), c('stations',
+                        'stations_dist',
+                        'df_final_proy',
+                        'outdf',
+                        'Y',
+                        'vars',
+                        'vars_q0.90',
+                        'vars_q0.75',
+                        'fechas_cmip6',
+                        'df_cmip6',
+                        'df_era5',
+                        'escalado_info',
+                        'escalado_info_q0.90',
+                        'escalado_info_q0.75')))
 
 # Creación de fórmula. Si aparece al cuadrado y normal como polinomio ortogonal
 generar_formula_poly <- function(vars) {
@@ -284,16 +305,19 @@ generar_formula_poly <- function(vars) {
 }
 
 vars_finales <- generar_formula_poly(vars)
+vars_finales_q0.90 <- generar_formula_poly(vars_q0.90)
+vars_finales_q0.75 <- generar_formula_poly(vars_q0.75)
 # esta fórmula permite observar cuales tienen valor poly
 # (aunque luego no se usa, porque se mantienen los nombres originales)
 
 # Crear una lista para ir almacenando las columnas
+## AQUI ME HE QUEDADO
 columnas <- list()
 
 # ESCALAR SEGÚN EL ESCALADO UTILIZADO EN EL MODELO AJUSTADO
-escalado_info <- readRDS("data_q0.95/escalado_info.rds")
-df_era5 <- readRDS('data_q0.95/df_era5.rds')
-df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
+# escalado_info <- readRDS("data_q0.95/escalado_info.rds")
+# df_era5 <- readRDS('data_q0.95/df_era5.rds')
+# df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
 
 for (var in vars_finales) {
   cat('Variable: ', var, '\n')
@@ -399,4 +423,22 @@ save(stations,
      vars,
      file = 'proyecciones.RData')
 
+save(stations,
+     stations_dist,
+     df_final_proy,
+     outdf,
+     v_q0.90_proy,
+     v_q0.90_proy_est,
+     Y,
+     vars_q0.90,
+     file = 'proyecciones.RData')
 
+save(stations,
+     stations_dist,
+     df_final_proy,
+     outdf,
+     v_q0.75_proy,
+     v_q0.75_proy_est,
+     Y,
+     vars_q0.75,
+     file = 'proyecciones.RData')
