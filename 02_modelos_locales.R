@@ -146,37 +146,51 @@ save(Y, df_final, stations, stations_dist,
      vars_q0.75, v_q0.75, file = 'data_q0.75/data.RData')
 
 #----Modelos finales----
-vars <- ifelse(grepl("^I\\(.*\\^2\\)$", vars),
-       paste0("`", vars, "`"),
-       vars)
-formula <- as.formula(paste('Y ~', paste(vars, collapse = '+')))
 
-vars <- gsub('`', '', vars)
-
-modelos_finales_q0.95 <- matrix(NA, nrow=dim(stations)[1], ncol = length(vars) + 4)
-modelos_finales_q0.95 <- as.data.frame(modelos_finales_q0.95)
-colnames(modelos_finales_q0.95) <- c('stations', 'NAME2', 'intercept', vars, 'R1')
-modelos_finales_q0.95$stations <- stations$STAID
-modelos_finales_q0.95$NAME2 <- stations$NAME2
-
-for(i in 1:dim(stations)[1]){
-  cat(stations$NAME2[i], '\n')
+modelos_finales <- function(vars, tau, v){
+  vars <- ifelse(grepl("^I\\(.*\\^2\\)$", vars),
+                 paste0("`", vars, "`"),
+                 vars)
+  formula <- as.formula(paste('Y ~', paste(vars, collapse = '+')))
   
-  ind <- which(v_q0.95$station == stations$STAID[i])
-  cat(ind[c(1, 2)], '\n')
+  vars <- gsub('`', '', vars)
   
-  mod <- rq(formula = formula, tau = 0.95, data = v_q0.95, subset = ind)
-  mod_nulo <- rq(formula = Y ~ 1, tau = 0.95, data = v_q0.95, subset = ind)
+  modelos_finales_df <- matrix(NA, nrow=dim(stations)[1], ncol = length(vars) + 4)
+  modelos_finales_df <- as.data.frame(modelos_finales_df)
+  colnames(modelos_finales_df) <- c('stations', 'NAME2', 'intercept', vars, 'R1')
+  modelos_finales_df$stations <- stations$STAID
+  modelos_finales_df$NAME2 <- stations$NAME2
   
-  cat('Intercepto:', coef(mod)[1], '\n')
+  for(i in 1:dim(stations)[1]){
+    cat(stations$NAME2[i], '\n')
+    
+    ind <- which(v$station == stations$STAID[i])
+    cat(ind[c(1, 2)], '\n')
+    
+    mod <- rq(formula = formula, tau = tau, data = v, subset = ind)
+    mod_nulo <- rq(formula = Y ~ 1, tau = tau, data = v, subset = ind)
+    
+    cat('Intercepto:', coef(mod)[1], '\n')
+    
+    R1 <- 1 - mod$rho / mod_nulo$rho
+    cat('R1: ', R1, '\n')
+    
+    modelos_finales_df[i, 3:(2 + length(vars) + 1)]<-c(coef(mod))
+    modelos_finales_df[i, 'R1'] <- R1
+    
+  }
   
-  R1 <- 1 - mod$rho / mod_nulo$rho
-  cat('R1: ', R1, '\n')
-  
-  modelos_finales_q0.95[i, 3:(2 + length(vars) + 1)]<-c(coef(mod))
-  modelos_finales_q0.95[i, 'R1'] <- R1
-  
+  return(list(
+    modelos = modelos_finales_df,
+    formula = formula))
 }
+
+modelos_finales_q0.95 <- modelos_finales(vars, 0.95, v_q0.95)[["modelos"]]
+formula <- modelos_finales(vars, 0.95, v_q0.95)[["formula"]]
+modelos_finales_q0.90 <- modelos_finales(vars_q0.90, 0.90, v_q0.90)[["modelos"]]
+formula_q0.90 <- modelos_finales(vars_q0.90, 0.90, v_q0.90)[["formula"]]
+modelos_finales_q0.75 <- modelos_finales(vars_q0.75, 0.75, v_q0.75)[["modelos"]]
+formula_q0.75 <- modelos_finales(vars_q0.75, 0.75, v_q0.75)[["formula"]]
 
 # save(Y, df_final, stations, stations_dist, 
 #      modelos_proyecto_q0.95, modelos_proyecto_q0.95_AIC, 
@@ -184,3 +198,15 @@ for(i in 1:dim(stations)[1]){
 #      modelos_finales_q0.95,
 #      formula,
 #      file = 'data.RData')
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.90, 
+     vars_q0.90, v_q0.90,
+     modelos_finales_q0.90,
+     formula_q0.90,
+     file = 'data_q0.90/data.RData')
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.75, 
+     vars_q0.75, v_q0.75,
+     modelos_finales_q0.75,
+     formula_q0.75,
+     file = 'data_q0.75/data.RData')
