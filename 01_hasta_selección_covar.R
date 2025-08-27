@@ -466,6 +466,14 @@ errores_q0.95 <- errores_modelo_df(prop, k, modelos_proyecto_q0.95, tau = 0.95)
 errores_q0.90 <- errores_modelo_df(prop, k, modelos_proyecto_q0.90, tau = 0.90)
 errores_q0.75 <- errores_modelo_df(prop, k, modelos_proyecto_q0.75, tau = 0.75)
 
+library(xtable)
+xtable(errores_q0.95, digits = c(0, rep(3, ncol(errores_q0.95))))
+xtable(errores_q0.95, digits = c(0, rep(3, ncol(errores_q0.95))))
+xtable(errores_q0.90, digits = c(0, rep(3, ncol(errores_q0.90))))
+xtable(errores_q0.90, digits = c(0, rep(3, ncol(errores_q0.90))))
+xtable(errores_q0.75, digits = c(0, rep(3, ncol(errores_q0.75))))
+xtable(errores_q0.75, digits = c(0, rep(3, ncol(errores_q0.75))))
+
 # pearson
 errores_p_q0.95 <- vector("list", length(prop)*length(k))
 i <- 1
