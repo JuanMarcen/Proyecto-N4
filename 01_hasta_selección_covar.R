@@ -281,8 +281,8 @@ modelos_proyecto_q0.95 <- modelos_tau(0.95, formula, df_final)
 modelos_proyecto_q0.90 <- modelos_tau(0.9, formula, df_final)
 modelos_proyecto_q0.75 <- modelos_tau(0.75, formula, df_final)
 #save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.95, file = 'data.RData')
-save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.90, file = 'data_q0.90/data.RData')
-save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.75, file = 'data_q0.75/data.RData')
+# save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.90, file = 'data_q0.90/data.RData')
+# save(Y, df_final, stations, stations_dist, modelos_proyecto_q0.75, file = 'data_q0.75/data.RData')
 
 #----Selección covariables----
 modelos_proyecto_q0.95$stations <- stations$STAID
@@ -425,7 +425,7 @@ errores_modelo_df <- function(prop, k, modelos, tau){
   }
   
   ciudades_p <- sapply(errores_p, function(x) x[[8]])
-  ciudades_p
+  vars_pearson <- lapply(errores_p, function(x) x$vars)
   
   # spearman
   errores_s <- vector("list", length(prop)*length(k))
@@ -438,7 +438,7 @@ errores_modelo_df <- function(prop, k, modelos, tau){
   }
   
   ciudades_s <- sapply(errores_s, function(x) x[[8]])
-  ciudades_s
+  vars_spearman <- lapply(errores_s, function(x) x$vars)
   
   # como data frames
   # pearson
@@ -455,7 +455,10 @@ errores_modelo_df <- function(prop, k, modelos, tau){
   errores_df_s$metodo <- rep('spearman', length=length(errores_s))
   errores_df_s$ciudad <- ciudades_s
   
-  return(list(pearson = errores_df_p, spearman = errores_df_s))
+  return(list(pearson = errores_df_p, 
+              spearman = errores_df_s,
+              vars_pearson = vars_pearson,
+              vars_spearman = vars_spearman))
 }
 
 prop <- seq(80/100, 95/100, by=0.05)
@@ -466,13 +469,20 @@ errores_q0.95 <- errores_modelo_df(prop, k, modelos_proyecto_q0.95, tau = 0.95)
 errores_q0.90 <- errores_modelo_df(prop, k, modelos_proyecto_q0.90, tau = 0.90)
 errores_q0.75 <- errores_modelo_df(prop, k, modelos_proyecto_q0.75, tau = 0.75)
 
+save(Y, df_final, stations, stations_dist, 
+     modelos_proyecto_q0.90, errores_q0.90,
+     file = 'data_q0.90/data.RData')
+save(Y, df_final, stations, stations_dist, 
+     modelos_proyecto_q0.75, errores_q0.75, 
+     file = 'data_q0.75/data.RData')
+
 library(xtable)
-xtable(errores_q0.95, digits = c(0, rep(3, ncol(errores_q0.95))))
-xtable(errores_q0.95, digits = c(0, rep(3, ncol(errores_q0.95))))
-xtable(errores_q0.90, digits = c(0, rep(3, ncol(errores_q0.90))))
-xtable(errores_q0.90, digits = c(0, rep(3, ncol(errores_q0.90))))
-xtable(errores_q0.75, digits = c(0, rep(3, ncol(errores_q0.75))))
-xtable(errores_q0.75, digits = c(0, rep(3, ncol(errores_q0.75))))
+xtable(errores_q0.95[['pearson']], digits = c(0, rep(3, ncol(errores_q0.95[['pearson']]))))
+xtable(errores_q0.95[['spearman']], digits = c(0, rep(3, ncol(errores_q0.95[['spearman']]))))
+xtable(errores_q0.90[['pearson']], digits = c(0, rep(3, ncol(errores_q0.90[['pearson']]))))
+xtable(errores_q0.90[['spearman']], digits = c(0, rep(3, ncol(errores_q0.90[['spearman']]))))
+xtable(errores_q0.75[['pearson']], digits = c(0, rep(3, ncol(errores_q0.75[['pearson']]))))
+xtable(errores_q0.75[['spearman']], digits = c(0, rep(3, ncol(errores_q0.75[['spearman']]))))
 
 # # pearson
 # errores_p_q0.95 <- vector("list", length(prop)*length(k))
