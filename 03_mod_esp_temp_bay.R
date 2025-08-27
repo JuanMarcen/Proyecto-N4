@@ -7,7 +7,9 @@ rm(list = setdiff(ls(), c('df_final',
                           'vars',
                           'modelos_finales_q0.95')))
 
-load('data.RData')
+load('data_q0.95/data.RData')
+load('data_q0.90/data.RData')
+load('data_q0.75/data.RData')
 
 library(spTReg)
 library(quantreg)
@@ -32,6 +34,8 @@ coords_km <- st_coordinates(stations) / 1000
 
 # fórmula, añadir elevación y distancia
 formula <- update(formula, .~. + elev + dist)
+formula_q0.90 <- update(formula_q0.90, .~. + elev + dist)
+formula_q0.75 <- update(formula_q0.75, .~. + elev + dist)
 
 #----Starting points----
 #obtencion de parametros de inicio

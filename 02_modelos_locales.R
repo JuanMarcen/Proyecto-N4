@@ -116,6 +116,10 @@ columnas <- columnas_df_sc(vars_finales) # q0.95
 columnas_q0.90 <- columnas_df_sc(vars_finales_q0.90)
 columnas_q0.75 <- columnas_df_sc(vars_finales_q0.75)
 
+escalado_info <- columnas_df_sc(vars_finales)[['escalado_info']]
+escalado_info_q0.90 <- columnas_df_sc(vars_finales_q0.90)[['escalado_info']]
+escalado_info_q0.75 <- columnas_df_sc(vars_finales_q0.75)[['escalado_info']]
+
 # Combinar todas las columnas en un único dataframe
 df_ajuste <- function(columnas, vars, df_base){
   v <- do.call(cbind, columnas)
@@ -139,10 +143,10 @@ v_q0.75 <- df_ajuste(columnas_q0.75$columnas, vars_q0.75, df_final)
 #      vars, v_q0.95, file = 'data.RData')
 
 save(Y, df_final, stations, stations_dist,
-     modelos_proyecto_q0.90,
+     modelos_proyecto_q0.90, escalado_info_q0.90, 
      vars_q0.90, v_q0.90, file = 'data_q0.90/data.RData')
 save(Y, df_final, stations, stations_dist,
-     modelos_proyecto_q0.75,
+     modelos_proyecto_q0.75, escalado_info_q0.75, 
      vars_q0.75, v_q0.75, file = 'data_q0.75/data.RData')
 
 #----Modelos finales----
@@ -202,11 +206,13 @@ save(Y, df_final, stations, stations_dist,
      modelos_proyecto_q0.90, 
      vars_q0.90, v_q0.90,
      modelos_finales_q0.90,
+     escalado_info_q0.90, 
      formula_q0.90,
      file = 'data_q0.90/data.RData')
 save(Y, df_final, stations, stations_dist,
      modelos_proyecto_q0.75, 
      vars_q0.75, v_q0.75,
      modelos_finales_q0.75,
+     escalado_info_q0.75, 
      formula_q0.75,
      file = 'data_q0.75/data.RData')
