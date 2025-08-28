@@ -779,7 +779,7 @@ dev.off()
 
 
 #----KS TEST meses Y PERIODOS----
-ks_test_df <- function(data, data_ref, type){
+ks_test_df <- function(data, data_ref, type, pred, pred_proy){
   cat('KS según ', type, '\n')
   
   if (type == 'month'){
@@ -802,19 +802,19 @@ ks_test_df <- function(data, data_ref, type){
                          & format(data_ref$Date, '%m') == month)
         
         mm_aux <- month.abb[as.integer(month)]
-        ks <- ks.test(data$pred_q0.95[ind], data$pred_q0.95_proy[ind])
+        ks <- ks.test(data[ind, pred], data[ind, pred_proy])
         
         ks_df[i, paste0(mm_aux, '.KS')] <- ks$statistic
         ks_df[i, paste0(mm_aux, '.KSp')] <- ks$p.value
         
-        ks_ref <- ks.test(data_ref$pred_q0.95[ind_ref], data_ref$pred_q0.95_proy[ind_ref])
+        ks_ref <- ks.test(data_ref[ind_ref, pred], data_ref[ind_ref, pred_proy])
         
         ks_df[i, paste0(mm_aux, '.KS_ref')] <- ks_ref$statistic
         ks_df[i, paste0(mm_aux, '.KSp_ref')] <- ks_ref$p.value
       }
     }
     
-  }else if (type == 'period'){
+  }else if (type == 'period'){ # solo para q0.95
     
     cat('Cálculo según', type, '\n')
     
@@ -830,8 +830,8 @@ ks_test_df <- function(data, data_ref, type){
         p <- periods[[name]]
         
         ind_p <- which(data$station[p] == stations$STAID[i])
-        ks_p <- ks.test(data$pred_q0.95[p][ind_p], 
-                         data$pred_q0.95_proy[p][ind_p])
+        ks_p <- ks.test(data[[pred]][ind_p], 
+                         data[[pred_proy]][p][ind_p])
         
         ks_df[i, paste0(name,'.KS')] <- ks_p$statistic
         ks_df[i, paste0(name,'.KSp')] <- ks_p$p.value
@@ -847,11 +847,18 @@ ks_test_df <- function(data, data_ref, type){
 }
 
 months <- c('06', '07', '08')
-ks_months <- ks_test_df(pred_q0.95_comp, pred_q0.95_comp_ref, type = 'month')
+ks_months <- ks_test_df(pred_q0.95_comp, pred_q0.95_comp_ref, type = 'month', 'pred_q0.95', 'pred_q0.95_proy')
+ks_months_q0.90 <- ks_test_df(pred_q0.90_comp, pred_q0.90_comp_ref, type = 'month', 'pred_q0.90', 'pred_q0.90_proy')
+ks_months_q0.75 <- ks_test_df(pred_q0.75_comp, pred_q0.75_comp_ref, type = 'month', 'pred_q0.75', 'pred_q0.75_proy')
 
+# solo cuantil 0.95
 periods <- list(`1960.1977` = p1, `1978.1995` = p2, `1996.2014` = p3, 
                 `1960.1980` = p_ref_ant, `1981.2010` = p_ref, `2011.2014` = p_ref_post)
-ks_periods <- ks_test_df(pred_q0.95_comp, pred_q0.95_comp_ref, type = 'period')
+ks_periods <- ks_test_df(pred_q0.95_comp, pred_q0.95_comp_ref, type = 'period', 'pred_q0.95', 'pred_q0.95_proy')
+
+p_ref <- list(`1981.2010` = p_ref)
+ks_periods_q0.90 <- ks_test_df(pred_q0.90_comp, pred_q0.90_comp_ref, type = 'period', 'pred_q0.90', 'pred_q0.90_proy')
+ks_periods_q0.75 <- ks_test_df(pred_q0.75_comp, pred_q0.75_comp_ref, type = 'period', 'pred_q0.75', 'pred_q0.75_proy')
 
 
 
