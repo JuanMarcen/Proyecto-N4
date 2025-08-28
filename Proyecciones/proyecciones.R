@@ -311,108 +311,124 @@ vars_finales_q0.75 <- generar_formula_poly(vars_q0.75)
 # esta fórmula permite observar cuales tienen valor poly
 # (aunque luego no se usa, porque se mantienen los nombres originales)
 
-# Crear una lista para ir almacenando las columnas
-## AQUI ME HE QUEDADO
-columnas <- list()
-
-# ESCALAR SEGÚN EL ESCALADO UTILIZADO EN EL MODELO AJUSTADO
-# escalado_info <- readRDS("data_q0.95/escalado_info.rds")
-# df_era5 <- readRDS('data_q0.95/df_era5.rds')
-# df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
-
-for (var in vars_finales) {
-  cat('Variable: ', var, '\n')
-  if (grepl("^poly\\(", var)) {
-    # Extraer el nombre real de la variable dentro del poly()
-    nombre_var <- sub("^poly\\(([^,]+),.*", "\\1", var)
-    
-    # Calcular los términos polinómicos SIN escalar
-    poly_cols <- poly(df_final_proy[[nombre_var]], degree = 2)
-    
-    # Recuperar los parámetros de escalado guardados
-    info <- escalado_info[[nombre_var]]
-    # info$center y info$scale son vectores con 2 elementos (uno por columna del poly)
-    
-    # Escalar con la misma media y sd que en el dataset original
-    poly_scaled <- sweep(poly_cols, 2, info$center, "-")
-    poly_scaled <- sweep(poly_scaled, 2, info$scale, "/")
-    
-    # Asignar nombres
-    colnames(poly_scaled) <- c(nombre_var, paste0("I(", nombre_var, "^2)"))
-    
-    # Añadir al listado
-    columnas[[length(columnas) + 1]] <- as.data.frame(poly_scaled)
-    
-  } else {
-    # Recuperar info de escalado para la variable
-    info <- escalado_info[[var]]
-    
-    # Escalar manualmente
-    var_scaled <- (df_final_proy[[var]] - info$center) / info$scale
-    
-    columnas[[length(columnas) + 1]] <- data.frame(var_scaled)
-    colnames(columnas[[length(columnas)]]) <- var
+v_proy <- function(vars_finales, vars, escalado_info){
+  # Crear una lista para ir almacenando las columnas
+  ## AQUI ME HE QUEDADO
+  columnas <- list()
+  
+  # ESCALAR SEGÚN EL ESCALADO UTILIZADO EN EL MODELO AJUSTADO
+  # escalado_info <- readRDS("data_q0.95/escalado_info.rds")
+  # df_era5 <- readRDS('data_q0.95/df_era5.rds')
+  # df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
+  
+  for (var in vars_finales) {
+    cat('Variable: ', var, '\n')
+    if (grepl("^poly\\(", var)) {
+      # Extraer el nombre real de la variable dentro del poly()
+      nombre_var <- sub("^poly\\(([^,]+),.*", "\\1", var)
+      
+      # Calcular los términos polinómicos SIN escalar
+      poly_cols <- poly(df_final_proy[[nombre_var]], degree = 2)
+      
+      # Recuperar los parámetros de escalado guardados
+      info <- escalado_info[[nombre_var]]
+      # info$center y info$scale son vectores con 2 elementos (uno por columna del poly)
+      
+      # Escalar con la misma media y sd que en el dataset original
+      poly_scaled <- sweep(poly_cols, 2, info$center, "-")
+      poly_scaled <- sweep(poly_scaled, 2, info$scale, "/")
+      
+      # Asignar nombres
+      colnames(poly_scaled) <- c(nombre_var, paste0("I(", nombre_var, "^2)"))
+      
+      # Añadir al listado
+      columnas[[length(columnas) + 1]] <- as.data.frame(poly_scaled)
+      
+    } else {
+      # Recuperar info de escalado para la variable
+      info <- escalado_info[[var]]
+      
+      # Escalar manualmente
+      var_scaled <- (df_final_proy[[var]] - info$center) / info$scale
+      
+      columnas[[length(columnas) + 1]] <- data.frame(var_scaled)
+      colnames(columnas[[length(columnas)]]) <- var
+    }
   }
+  
+  
+  # Combinar todas las columnas en un único dataframe
+  v <- do.call(cbind, columnas)
+  v <- v[, vars]
+  v$elev <- as.numeric(df_final_proy$elev)
+  v$dist <- as.numeric(df_final_proy$dist)
+  v$Date <- df_final_proy$Date
+  v$station <- as.integer(df_final_proy$station)
+  v$Y <- df_final_proy$Y
+  v <- v[, c((ncol(v)-2):ncol(v), 1:(ncol(v)-3))]
+  
+  return(v)
 }
 
-
-# Combinar todas las columnas en un único dataframe
-v_q0.95_proy <- do.call(cbind, columnas)
-v_q0.95_proy <- v_q0.95_proy[, vars]
-v_q0.95_proy$elev <- as.numeric(df_final_proy$elev)
-v_q0.95_proy$dist <- as.numeric(df_final_proy$dist)
-v_q0.95_proy$Date <- df_final_proy$Date
-v_q0.95_proy$station <- as.integer(df_final_proy$station)
-v_q0.95_proy$Y <- df_final_proy$Y
-v_q0.95_proy <- v_q0.95_proy[, c((ncol(v_q0.95_proy)-2):ncol(v_q0.95_proy), 1:(ncol(v_q0.95_proy)-3))]
-
+v_q0.95_proy <- v_proy(vars_finales, vars, escalado_info)
+v_q0.90_proy <- v_proy(vars_finales_q0.90, vars_q0.90, escalado_info_q0.90)
+v_q0.75_proy <- v_proy(vars_finales_q0.75, vars_q0.75, escalado_info_q0.75)
 
 # extra escalado (Jorge)
-sigmas <- data.frame(
-  matrix(NA, nrow = dim(df_cmip6)[1], ncol = 2 * length(vars))
-)
-colnames(sigmas) <- c(paste0('sd_era5_', vars), paste0('sd_cmip6_', vars))
-sigmas$Date <- df_cmip6$Date
-for(var in vars){
-  cat('Variable: ', var, '\n')
-  es_cuadrado <- grepl("^I\\(.*\\^2\\)$", var)
-  var_clean <- gsub('_lag', '', var)
-  var_clean <- gsub("^I\\((.*)\\^2\\)$", "\\1", var_clean)
-  cat('Transformada a ', var_clean, '\n')
+v_proy_est <- function(vars, v_proy){
   
-  if (var == 's.1' || var == 'c.1'){
-    cat('Seno o coseno\n')
-    sigmas[, paste0('sd_cmip6_', var)] <- 1
-    sigmas[, paste0('sd_era5_', var)] <- 1
-    next
-  }
+  sigmas <- data.frame(
+    matrix(NA, nrow = dim(df_cmip6)[1], ncol = 2 * length(vars))
+  )
+  colnames(sigmas) <- c(paste0('sd_era5_', vars), paste0('sd_cmip6_', vars))
+  sigmas$Date <- df_cmip6$Date
   
-  for (i in 1:dim(stations)[1]){
-    ind <- which(df_cmip6$station == stations$STAID[i])
-    ind_jja <- which(df_cmip6$t[ind] >= 22 & df_cmip6$t[ind] <= 51 & df_cmip6$l[ind] >= 152)
-
-    formula <- as.formula(paste(var_clean, "~ s.1 + c.1"))
-    mod <- lm(formula, data = df_cmip6[ind,], subset = ind_jja)
-    mod2<- lm(formula, data = df_era5[ind,], subset = ind_jja)
-
-    if (es_cuadrado == FALSE){
-      sigmas[ind, paste0('sd_cmip6_', var)] <- summary(mod)$sigma
-      sigmas[ind, paste0('sd_era5_', var)] <- summary(mod2)$sigma
-    }else{
-      sigmas[ind, paste0('sd_cmip6_', var)] <- (summary(mod)$sigma)^2
-      sigmas[ind, paste0('sd_era5_', var)] <- (summary(mod2)$sigma)^2
+  for(var in vars){
+    cat('Variable: ', var, '\n')
+    es_cuadrado <- grepl("^I\\(.*\\^2\\)$", var)
+    var_clean <- gsub('_lag', '', var)
+    var_clean <- gsub("^I\\((.*)\\^2\\)$", "\\1", var_clean)
+    cat('Transformada a ', var_clean, '\n')
+    
+    if (var == 's.1' || var == 'c.1'){
+      cat('Seno o coseno\n')
+      sigmas[, paste0('sd_cmip6_', var)] <- 1
+      sigmas[, paste0('sd_era5_', var)] <- 1
+      next
     }
     
+    for (i in 1:dim(stations)[1]){
+      ind <- which(df_cmip6$station == stations$STAID[i])
+      ind_jja <- which(df_cmip6$t[ind] >= 22 & df_cmip6$t[ind] <= 51 & df_cmip6$l[ind] >= 152)
+  
+      formula <- as.formula(paste(var_clean, "~ s.1 + c.1"))
+      mod <- lm(formula, data = df_cmip6[ind,], subset = ind_jja)
+      mod2<- lm(formula, data = df_era5[ind,], subset = ind_jja)
+  
+      if (es_cuadrado == FALSE){
+        sigmas[ind, paste0('sd_cmip6_', var)] <- summary(mod)$sigma
+        sigmas[ind, paste0('sd_era5_', var)] <- summary(mod2)$sigma
+      }else{
+        sigmas[ind, paste0('sd_cmip6_', var)] <- (summary(mod)$sigma)^2
+        sigmas[ind, paste0('sd_era5_', var)] <- (summary(mod2)$sigma)^2
+      }
+      
+    }
   }
+  
+  sigmas <- sigmas[which(format(sigmas$Date, '%m-%d') != '05-31'), ]
+  
+  v <- v_proy
+  for (var in vars){
+    v[, var] <- v[, var] * sigmas[, paste0('sd_era5_', var)] / sigmas[, paste0('sd_cmip6_', var)]
+  }
+
+  return(v)
 }
 
-sigmas <- sigmas[which(format(sigmas$Date, '%m-%d') != '05-31'), ]
-
-v_q0.95_proy_est <- v_q0.95_proy
-for (var in vars){
-  v_q0.95_proy_est[, var] <- v_q0.95_proy_est[, var] * sigmas[, paste0('sd_era5_', var)] / sigmas[, paste0('sd_cmip6_', var)]
-}
-
+v_q0.95_proy_est <- v_proy_est(vars, v_q0.95_proy)
+v_q0.90_proy_est <- v_proy_est(vars_q0.90, v_q0.90_proy)
+v_q0.75_proy_est <- v_proy_est(vars_q0.75, v_q0.75_proy)
 
 save(stations,
      stations_dist,

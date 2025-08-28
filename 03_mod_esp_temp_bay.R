@@ -532,6 +532,11 @@ save(Y, df_final, stations, stations_dist,
      pred_q0.75, R1_bay_q0.75, rho_q0.75,
      file = 'data_q0.70/data.RData')
 
+save(betas_q0.95, betas_q0.75, betas_q0.90,
+     betas, check, predictions, 
+     R1_bay, rho_bay, traducir_nombres_coef,
+     file = 'predictions.RData')
+
 # Gráficas de desagregación
 par(mfrow = c(1, 2))
 plot(1:length(rho_q0.95$rho_dias$rho_bay_dia), 
