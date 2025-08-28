@@ -136,10 +136,10 @@ mod_q0.95_bay <- mod_bay(
   coords = coords_km, 
   start_beta = start_beta_q0.95, 
   inic_procesos = inic_procesos_q0.95, 
-  n.samples = 100, 
-  n.burnin = 1, 
-  n.thin = 1, 
-  n.report = 10)
+  n.samples = 100000, 
+  n.burnin = 100000, 
+  n.thin = 1000, 
+  n.report = 1000)
 
 mod_q0.90_bay <- mod_bay(
   formula = formula_q0.90, 
@@ -149,10 +149,10 @@ mod_q0.90_bay <- mod_bay(
   coords = coords_km, 
   start_beta = start_beta_q0.90, 
   inic_procesos = inic_procesos_q0.90, 
-  n.samples = 100, 
-  n.burnin = 1, 
-  n.thin = 1, 
-  n.report = 10)
+  n.samples = 100000, 
+  n.burnin = 100000, 
+  n.thin = 1000, 
+  n.report = 1000)
 
 mod_q0.75_bay <- mod_bay(
   formula = formula_q0.75, 
@@ -162,10 +162,10 @@ mod_q0.75_bay <- mod_bay(
   coords = coords_km, 
   start_beta = start_beta_q0.75, 
   inic_procesos = inic_procesos_q0.75, 
-  n.samples = 100, 
-  n.burnin = 1, 
-  n.thin = 1, 
-  n.report = 10)
+  n.samples = 100000, 
+  n.burnin = 100000, 
+  n.thin = 1000, 
+  n.report = 1000)
 
 
 # mod_q0.95_bay<-spTm(formula,
