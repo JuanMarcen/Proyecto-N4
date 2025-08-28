@@ -1,3 +1,4 @@
+# TODO YA GENERALIZADO MENOS EL TEMA GRÁFICAS
 
 rm(list = setdiff(ls(), c('df_final',
                           'stations',
@@ -298,6 +299,8 @@ betas <- function(vars, mod, cuantil){
 
 
 betas_q0.95 <- betas(vars, mod_q0.95_bay, cuantil = 0.95)
+betas_q0.90 <- betas(vars_q0.90, mod_q0.90_bay, cuantil = 0.90)
+betas_q0.75 <- betas(vars_q0.75, mod_q0.75_bay, cuantil = 0.75)
 
 
 #----Predicciones----
@@ -331,8 +334,13 @@ predictions <- function(vars, betas, df, cuantil){
 }
 
 pred_q0.95 <- predictions(vars, mod_q0.95_bay, betas_q0.95, v_q0.95, cuantil = 0.95)
-
 pred_q0.95 <- cbind(v_q0.95[,c('Date', 'station', 'Y')], pred_q0.95)
+
+pred_q0.90 <- predictions(vars_q0.90, mod_q0.90_bay, betas_q0.90, v_q0.90, cuantil = 0.90)
+pred_q0.90 <- cbind(v_q0.90[,c('Date', 'station', 'Y')], pred_q0.90)
+
+pred_q0.75 <- predictions(vars_q0.75, mod_q0.75_bay, betas_q0.75, v_q0.75, cuantil = 0.75)
+pred_q0.75 <- cbind(v_q0.75[,c('Date', 'station', 'Y')], pred_q0.75)
 
 # save(Y, df_final, stations, stations_dist, 
 #      modelos_proyecto_q0.95, modelos_proyecto_q0.95_AIC, 
@@ -342,12 +350,28 @@ pred_q0.95 <- cbind(v_q0.95[,c('Date', 'station', 'Y')], pred_q0.95)
 #      pred_q0.95, 
 #      file = 'data.RData')
 
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.90, 
+     vars_q0.90, v_q0.90,
+     modelos_finales_q0.90,
+     formula_q0.90, mod_q0.90_bay, elev_sc, dist_sc,
+     pred_q0.90,
+     file = 'data_q0.90/data.RData')
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.75, 
+     vars_q0.75, v_q0.75,
+     modelos_finales_q0.75,
+     formula_q0.75, mod_q0.75_bay, elev_sc, dist_sc,
+     pred_q0.75,
+     file = 'data_q0.75/data.RData')
+
+
 #----R1----
 check <- function(u, tau) {
   return(u * (tau - (u < 0)))  # Implements the quantile loss function
 }
 
-R1_bay <- function(pred, tau){
+R1_bay <- function(pred, tau, data){
   pred_clean <- na.omit(pred)
   
   #dataframe para global
@@ -361,7 +385,7 @@ R1_bay <- function(pred, tau){
   colnames(df_local) <- c('R1_bay_local')
   
   #modelos nulos, son para todas variables igual
-  mod_nulo_f <- rq(Y ~ as.factor(station), data = v_q0.95, tau = tau)
+  mod_nulo_f <- rq(Y ~ as.factor(station), data = data, tau = tau)
   
   rho_estacion <- rep(NA, dim(stations)[1])
   R1_nulo_est <- rep(NA, dim(stations)[1])
@@ -377,15 +401,10 @@ R1_bay <- function(pred, tau){
   return(list(R1_globales = df, R1_locales = df_local))
 }
 
-R1_bay_q0.95 <- R1_bay(pred_q0.95, 0.95)
+R1_bay_q0.95 <- R1_bay(pred_q0.95, 0.95, v_q0.95)
+R1_bay_q0.90 <- R1_bay(pred_q0.90, 0.90, v_q0.90)
+R1_bay_q0.75 <- R1_bay(pred_q0.75, 0.75, v_q0.75)
 
-# save(Y, df_final, stations, stations_dist,
-#      modelos_proyecto_q0.95, modelos_proyecto_q0.95_AIC,
-#      vars, v_q0.95,
-#      modelos_finales_q0.95,
-#      formula, mod_q0.95_bay, elev_sc, dist_sc,
-#      pred_q0.95, R1_bay_q0.95, rho_q0.95,
-#      file = 'data.RData')
 
 #----RHO----
 library(lubridate)
@@ -488,6 +507,30 @@ rho_bay <- function(predicciones, tau){
 }
 
 rho_q0.95 <- rho_bay(pred_q0.95, 0.95)
+rho_q0.90 <- rho_bay(pred_q0.90, 0.90)
+rho_q0.75 <- rho_bay(pred_q0.75, 0.75)
+
+# save(Y, df_final, stations, stations_dist,
+#      modelos_proyecto_q0.95, modelos_proyecto_q0.95_AIC,
+#      vars, v_q0.95,
+#      modelos_finales_q0.95,
+#      formula, mod_q0.95_bay, elev_sc, dist_sc,
+#      pred_q0.95, R1_bay_q0.95, rho_q0.95,
+#      file = 'data.RData')
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.90, 
+     vars_q0.90, v_q0.90,
+     modelos_finales_q0.90,
+     formula_q0.90, mod_q0.90_bay, elev_sc, dist_sc,
+     pred_q0.90, R1_bay_q0.90, rho_q0.90,
+     file = 'data_q0.90/data.RData')
+save(Y, df_final, stations, stations_dist,
+     modelos_proyecto_q0.75, 
+     vars_q0.75, v_q0.75,
+     modelos_finales_q0.75,
+     formula_q0.75, mod_q0.75_bay, elev_sc, dist_sc,
+     pred_q0.75, R1_bay_q0.75, rho_q0.75,
+     file = 'data_q0.70/data.RData')
 
 # Gráficas de desagregación
 par(mfrow = c(1, 2))
@@ -526,6 +569,8 @@ for (i in 1:dim(stations)[1]){
 dev.off()
 
 
+
+
 #----Extra: Estudio de los residuos----
 library(lubridate)
 dev.off()
@@ -561,4 +606,7 @@ for (i in 1:dim(stations)[1]){
   
 }
 dev.off()
+
+
+
 
