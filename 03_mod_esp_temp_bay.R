@@ -532,7 +532,9 @@ save(Y, df_final, stations, stations_dist,
      pred_q0.75, R1_bay_q0.75, rho_q0.75,
      file = 'data_q0.70/data.RData')
 
+# para sacar predicciones de las proyecciones
 save(betas_q0.95, betas_q0.75, betas_q0.90,
+     pred_q0.95, pred_q0.90, pred_q0.75,
      betas, check, predictions, 
      R1_bay, rho_bay, traducir_nombres_coef,
      file = 'predictions.RData')
