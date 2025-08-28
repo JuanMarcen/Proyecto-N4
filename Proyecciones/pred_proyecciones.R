@@ -830,7 +830,7 @@ ks_test_df <- function(data, data_ref, type, pred, pred_proy){
         p <- periods[[name]]
         
         ind_p <- which(data$station[p] == stations$STAID[i])
-        ks_p <- ks.test(data[[pred]][ind_p], 
+        ks_p <- ks.test(data[[pred]][p][ind_p], 
                          data[[pred_proy]][p][ind_p])
         
         ks_df[i, paste0(name,'.KS')] <- ks_p$statistic
@@ -892,7 +892,7 @@ ks_periods_q0.75 <- ks_test_df(pred_q0.75_comp, pred_q0.75_comp_ref, type = 'per
 #   }
 # }
 # 
-# source('mapa_Spain.R')
+source('mapa_Spain.R')
 # 
 # jun <- spain_points(ks_months$Jun.KSp, stations, 'KS Test June', 'p-value')
 # jul <- spain_points(ks_months$Jul.KSp, stations, 'KS Test July', 'p-value')
@@ -909,6 +909,7 @@ ks_periods_q0.75 <- ks_test_df(pred_q0.75_comp, pred_q0.75_comp_ref, type = 'per
 #   dpi = 300       
 # )
 
+#cuantil 0.95
 jun_ref <- spain_points(ks_months$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
 jul_ref <- spain_points(ks_months$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
 aug_ref <- spain_points(ks_months$Aug.KSp_ref, stations, 'KS Test August', 'p-values')
@@ -918,6 +919,38 @@ p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, nco
 
 ggsave(
   filename = "Proyecciones/p_values_month_ref.png", 
+  plot = p_values_month_ref, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+#cuantil 0.90
+jun_ref <- spain_points(ks_months_q0.90$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
+jul_ref <- spain_points(ks_months_q0.90$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
+aug_ref <- spain_points(ks_months_q0.90$Aug.KSp_ref, stations, 'KS Test August', 'p-values')
+
+p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, ncol = 3,
+                                        common.legend = T, legend = 'bottom')
+
+ggsave(
+  filename = "Proyecciones/p_values_month_ref_q0.90.png", 
+  plot = p_values_month_ref, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+#cuantil 0.75
+jun_ref <- spain_points(ks_months_q0.75$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
+jul_ref <- spain_points(ks_months_q0.75$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
+aug_ref <- spain_points(ks_months_q0.75$Aug.KSp_ref, stations, 'KS Test August', 'p-values')
+
+p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, ncol = 3,
+                                        common.legend = T, legend = 'bottom')
+
+ggsave(
+  filename = "Proyecciones/p_values_month_ref_q0.75.png", 
   plot = p_values_month_ref, 
   width = 12,
   height = 5,     
@@ -1003,6 +1036,23 @@ ggsave(
   dpi = 300       
 )
 
+
+# 3 cuantiles en periodo de referencia
+ks_p_ref_q0.75 <- spain_points(ks_periods_q0.75$`1981.2010.KSp`, stations, 'KS Test 1981-2010 Q0.75', 'p-value')
+ks_p_ref_q0.90 <- spain_points(ks_periods_q0.90$`1981.2010.KSp`, stations, 'KS Test 1981-2010 Q0.90', 'p-value')
+ks_p_ref <- spain_points(ks_periods$`1981.2010.KSp`, stations, 'KS Test 1981-2010 Q0.95', 'p-value')
+
+p_values_ref <- ggpubr::ggarrange(ks_p_ref_q0.75, ks_p_ref_q0.90, ks_p_ref, 
+                                  nrow = 1, ncol = 3,
+                                  common.legend = T, legend = 'bottom')
+
+ggsave(
+  filename = "Proyecciones/p_values_ref.png", 
+  plot = p_values_ref, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
 
 #----MEDIAS ANUALES----
 medias_anuales <- function(data, station){
