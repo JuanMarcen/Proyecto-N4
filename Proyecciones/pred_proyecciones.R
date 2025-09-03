@@ -39,6 +39,9 @@ pred_q0.75_comp <- cbind(pred_q0.75_era5, pred_q0.75_proy, pred_q0.75_proy_est)
 pred_q0.75_comp_ref <- pred_q0.75_comp[which(pred_q0.75_comp$Date >= '1981-06-01' &
                                                pred_q0.75_comp$Date <= '2010-08-31'), ]
 
+saveRDS(pred_q0.90_comp, 'data_q0.90/pred_q0.90_comp.rds')
+saveRDS(pred_q0.75_comp, 'data_q0.75/pred_q0.75_comp.rds')
+
 # solo para q0.95. Para resto cuantiles solo lo hacemos en el periodo de referencia
 p1 <- which(year(pred_q0.95_comp$Date) >= '1960'
             & year(pred_q0.95_comp$Date) <= '1977')
@@ -856,7 +859,7 @@ periods <- list(`1960.1977` = p1, `1978.1995` = p2, `1996.2014` = p3,
                 `1960.1980` = p_ref_ant, `1981.2010` = p_ref, `2011.2014` = p_ref_post)
 ks_periods <- ks_test_df(pred_q0.95_comp, pred_q0.95_comp_ref, type = 'period', 'pred_q0.95', 'pred_q0.95_proy')
 
-p_ref <- list(`1981.2010` = p_ref)
+periods <- list(`1981.2010` = p_ref)
 ks_periods_q0.90 <- ks_test_df(pred_q0.90_comp, pred_q0.90_comp_ref, type = 'period', 'pred_q0.90', 'pred_q0.90_proy')
 ks_periods_q0.75 <- ks_test_df(pred_q0.75_comp, pred_q0.75_comp_ref, type = 'period', 'pred_q0.75', 'pred_q0.75_proy')
 
@@ -910,11 +913,11 @@ source('mapa_Spain.R')
 # )
 
 #cuantil 0.95
-jun_ref <- spain_points(ks_months$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
-jul_ref <- spain_points(ks_months$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
-aug_ref <- spain_points(ks_months$Aug.KSp_ref, stations, 'KS Test August', 'p-values')
+jun_ref1 <- spain_points(ks_months$Jun.KSp_ref, stations, 'KS Test June Q0.95', 'p-values')
+jul_ref1 <- spain_points(ks_months$Jul.KSp_ref, stations, 'KS Test July Q0.95', 'p-values')
+aug_ref1 <- spain_points(ks_months$Aug.KSp_ref, stations, 'KS Test August Q0.95', 'p-values')
 
-p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, ncol = 3,
+p_values_month_ref <- ggpubr::ggarrange(jun_ref1, jul_ref1, aug_ref1, nrow = 1, ncol = 3,
                                     common.legend = T, legend = 'bottom')
 
 ggsave(
@@ -926,11 +929,11 @@ ggsave(
 )
 
 #cuantil 0.90
-jun_ref <- spain_points(ks_months_q0.90$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
-jul_ref <- spain_points(ks_months_q0.90$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
-aug_ref <- spain_points(ks_months_q0.90$Aug.KSp_ref, stations, 'KS Test August', 'p-values')
+jun_ref2 <- spain_points(ks_months_q0.90$Jun.KSp_ref, stations, 'KS Test June Q0.90', 'p-values')
+jul_ref2 <- spain_points(ks_months_q0.90$Jul.KSp_ref, stations, 'KS Test July Q0.90', 'p-values')
+aug_ref2 <- spain_points(ks_months_q0.90$Aug.KSp_ref, stations, 'KS Test August Q0.90', 'p-values')
 
-p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, ncol = 3,
+p_values_month_ref <- ggpubr::ggarrange(jun_ref2, jul_ref2, aug_ref2, nrow = 1, ncol = 3,
                                         common.legend = T, legend = 'bottom')
 
 ggsave(
@@ -942,11 +945,11 @@ ggsave(
 )
 
 #cuantil 0.75
-jun_ref <- spain_points(ks_months_q0.75$Jun.KSp_ref, stations, 'KS Test June', 'p-values')
-jul_ref <- spain_points(ks_months_q0.75$Jul.KSp_ref, stations, 'KS Test July', 'p-values')
-aug_ref <- spain_points(ks_months_q0.75$Aug.KSp_ref, stations, 'KS Test August', 'p-values')
+jun_ref3 <- spain_points(ks_months_q0.75$Jun.KSp_ref, stations, 'KS Test June Q0.75', 'p-values')
+jul_ref3 <- spain_points(ks_months_q0.75$Jul.KSp_ref, stations, 'KS Test July Q0.75', 'p-values')
+aug_ref3 <- spain_points(ks_months_q0.75$Aug.KSp_ref, stations, 'KS Test August Q0.75', 'p-values')
 
-p_values_month_ref <- ggpubr::ggarrange(jun_ref, jul_ref, aug_ref, nrow = 1, ncol = 3,
+p_values_month_ref <- ggpubr::ggarrange(jun_ref3, jul_ref3, aug_ref3, nrow = 1, ncol = 3,
                                         common.legend = T, legend = 'bottom')
 
 ggsave(
@@ -954,6 +957,21 @@ ggsave(
   plot = p_values_month_ref, 
   width = 12,
   height = 5,     
+  dpi = 300       
+)
+
+
+# all together
+p_values_month_ref <- ggpubr::ggarrange(jun_ref1, jul_ref1, aug_ref1,
+                                        jun_ref2, jul_ref2, aug_ref2,
+                                        jun_ref3, jul_ref3, aug_ref3, nrow = 3, ncol = 3,
+                                        common.legend = T, legend = 'bottom')
+
+ggsave(
+  filename = "Proyecciones/p_values_month_ref_all.png", 
+  plot = p_values_month_ref, 
+  width = 12,
+  height = 5*3,     
   dpi = 300       
 )
 
