@@ -15,11 +15,11 @@ dist_sc <- scale(stations_dist$DIST)
 pred_q0.95_proy <- predictions(vars, betas_q0.95, v_q0.95_proy, cuantil = 0.95)
 pred_q0.95_proy_est <- predictions(vars, betas_q0.95, v_q0.95_proy_est, cuantil = 0.95)
 
-pred_q0.90_proy <- predictions(vars, betas_q0.90, v_q0.90_proy, cuantil = 0.90)
-pred_q0.90_proy_est <- predictions(vars, betas_q0.90, v_q0.90_proy_est, cuantil = 0.90)
+pred_q0.90_proy <- predictions(vars_q0.90, betas_q0.90, v_q0.90_proy, cuantil = 0.90)
+pred_q0.90_proy_est <- predictions(vars_q0.90, betas_q0.90, v_q0.90_proy_est, cuantil = 0.90)
 
-pred_q0.75_proy <- predictions(vars, betas_q0.75, v_q0.75_proy, cuantil = 0.75)
-pred_q0.75_proy_est <- predictions(vars, betas_q0.75, v_q0.75_proy_est, cuantil = 0.75)
+pred_q0.75_proy <- predictions(vars_q0.75, betas_q0.75, v_q0.75_proy, cuantil = 0.75)
+pred_q0.75_proy_est <- predictions(vars_q0.75, betas_q0.75, v_q0.75_proy_est, cuantil = 0.75)
 
 fechas_cmip6 <- c(min(df_final_proy$Date), max(df_final_proy$Date))
 
@@ -279,7 +279,7 @@ density_plots(pred_q0.95_comp,
 dev.off()
 
 # CUANTIL 0.90
-png('Proyecciones/density_plots/comp_dens_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.90/comp_dens_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.90_comp_ref, 
               'pred_q0.90', 
@@ -287,7 +287,7 @@ density_plots(pred_q0.90_comp_ref,
               'pred_q0.90_proy_est')
 dev.off()
 
-png('Proyecciones/density_plots/dens_jun_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.90/dens_jun_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.90_comp_ref, 
               'pred_q0.90', 
@@ -297,7 +297,7 @@ density_plots(pred_q0.90_comp_ref,
               month = '06')
 dev.off()
 
-png('Proyecciones/density_plots/dens_jul_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.90/dens_jul_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.90_comp_ref, 
               'pred_q0.90', 
@@ -307,7 +307,7 @@ density_plots(pred_q0.90_comp_ref,
               month = '07')
 dev.off()
 
-png('Proyecciones/density_plots/dens_aug_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.90/dens_aug_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.90_comp_ref, 
               'pred_q0.90', 
@@ -318,7 +318,7 @@ density_plots(pred_q0.90_comp_ref,
 dev.off()
 
 # CUANTIL 0.75
-png('Proyecciones/density_plots/comp_dens_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.75/comp_dens_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.75_comp_ref, 
               'pred_q0.75', 
@@ -326,7 +326,7 @@ density_plots(pred_q0.75_comp_ref,
               'pred_q0.75_proy_est')
 dev.off()
 
-png('Proyecciones/density_plots/dens_jun_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.75/dens_jun_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.75_comp_ref, 
               'pred_q0.75', 
@@ -336,7 +336,7 @@ density_plots(pred_q0.75_comp_ref,
               month = '06')
 dev.off()
 
-png('Proyecciones/density_plots/dens_jul_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.75/dens_jul_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.75_comp_ref, 
               'pred_q0.75', 
@@ -346,7 +346,7 @@ density_plots(pred_q0.75_comp_ref,
               month = '07')
 dev.off()
 
-png('Proyecciones/density_plots/dens_aug_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/density_plots/q0.75/dens_aug_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 density_plots(pred_q0.75_comp_ref, 
               'pred_q0.75', 
@@ -639,21 +639,21 @@ qqplots(pred_q0.95_comp,
 dev.off()
 
 # CUANTIL 0.90
-png('Proyecciones/qqplots/qqplot_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
         'pred_q0.90_proy')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
         'pred_q0.90_proy_est')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jun_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_jun_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
@@ -662,7 +662,7 @@ qqplots(pred_q0.90_comp_ref,
         month = '06')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jun_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_jun_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
@@ -671,7 +671,7 @@ qqplots(pred_q0.90_comp_ref,
         month = '06')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jul_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_jul_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
@@ -680,7 +680,7 @@ qqplots(pred_q0.90_comp_ref,
         month = '07')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jul_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_jul_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
@@ -689,7 +689,7 @@ qqplots(pred_q0.90_comp_ref,
         month = '07')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_aug_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_aug_ref_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
@@ -698,7 +698,7 @@ qqplots(pred_q0.90_comp_ref,
         month = '08')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_aug_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.90/qqplot_aug_ref_est_q0.90.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.90_comp_ref, 
         'pred_q0.90', 
@@ -709,21 +709,21 @@ dev.off()
 
 
 # CUANTIL 0.75
-png('Proyecciones/qqplots/qqplot_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
         'pred_q0.75_proy')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
         'pred_q0.75_proy_est')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jun_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_jun_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
@@ -732,7 +732,7 @@ qqplots(pred_q0.75_comp_ref,
         month = '06')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jun_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_jun_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
@@ -741,7 +741,7 @@ qqplots(pred_q0.75_comp_ref,
         month = '06')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jul_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_jul_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
@@ -750,7 +750,7 @@ qqplots(pred_q0.75_comp_ref,
         month = '07')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_jul_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_jul_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
@@ -759,7 +759,7 @@ qqplots(pred_q0.75_comp_ref,
         month = '07')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_aug_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_aug_ref_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
@@ -768,7 +768,7 @@ qqplots(pred_q0.75_comp_ref,
         month = '08')
 dev.off()
 
-png('Proyecciones/qqplots/qqplot_aug_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+png('Proyecciones/qqplots/q0.75/qqplot_aug_ref_est_q0.75.png', width = 2000*3/3, height = 2200*3/2, res = 150)
 par(mfrow=c(10,4))
 qqplots(pred_q0.75_comp_ref, 
         'pred_q0.75', 
