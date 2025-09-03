@@ -391,7 +391,7 @@ R1_bay <- function(pred, tau, data){
   R1_nulo_est <- rep(NA, dim(stations)[1])
   for (j in 1:length(rho_estacion)){
     ind <- which(pred_clean$station == stations$STAID[j])
-    rho_estacion[j] <- sum(check(pred_clean$Y[ind] - pred_clean[ind,paste0('pred_q',tau)],tau = tau))
+    rho_estacion[j] <- sum(check(pred_clean$Y[ind] - pred_clean[ind,paste0('pred_q',format(tau, nsmall = 2))],tau = tau))
     R1_nulo_est[j] <- sum(check(mod_nulo_f$residuals[ind], tau = tau))
   }
   
@@ -405,6 +405,17 @@ R1_bay_q0.95 <- R1_bay(pred_q0.95, 0.95, v_q0.95)
 R1_bay_q0.90 <- R1_bay(pred_q0.90, 0.90, v_q0.90)
 R1_bay_q0.75 <- R1_bay(pred_q0.75, 0.75, v_q0.75)
 
+# aux <- cbind(
+#              round(modelos_finales_q0.75$R1, 3),
+#              round(R1_bay_q0.75$R1_locales, 3),
+#              round(modelos_finales_q0.90$R1, 3),
+#              round(R1_bay_q0.90$R1_locales, 3),
+#              round(modelos_finales_q0.95$R1, 3),
+#              round(R1_bay_q0.95$R1_locales, 3)
+# )
+# orden <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/orden.rds")
+# aux <- aux[orden, ]
+# esc_tabla_negrita(aux, colq0.5 = c(1,3,5), colq0.95 = c(2,4,6))
 
 #----RHO----
 library(lubridate)
@@ -415,7 +426,7 @@ rho_bay <- function(predicciones, tau){
   df <- matrix(NA, nrow=1, ncol=1)
   df <- as.data.frame(df)
   colnames(df) <- c('rho_bay_global')
-  pred <- predicciones[[paste0('pred_q',tau)]]
+  pred <- predicciones[[paste0('pred_q',format(tau, nsmall = 2))]]
   dif<- predicciones$Y - pred
   df['rho_bay_global'] <- sum(dif < 0, na.rm = T) / ( 40 * 64 * 92)
   
@@ -530,7 +541,7 @@ save(Y, df_final, stations, stations_dist,
      modelos_finales_q0.75,
      formula_q0.75, mod_q0.75_bay, elev_sc, dist_sc,
      pred_q0.75, R1_bay_q0.75, rho_q0.75,
-     file = 'data_q0.70/data.RData')
+     file = 'data_q0.75/data.RData')
 
 # para sacar predicciones de las proyecciones
 save(betas_q0.95, betas_q0.75, betas_q0.90,
@@ -541,19 +552,19 @@ save(betas_q0.95, betas_q0.75, betas_q0.90,
 
 # Gráficas de desagregación
 par(mfrow = c(1, 2))
-plot(1:length(rho_q0.95$rho_dias$rho_bay_dia), 
-     rho_q0.95$rho_dias$rho_bay_dia, type = "l", xlab = "l", 
-     ylab = expression(rho[l](0.95)),
-     ylim=c(0.85,1),
+plot(1:length(rho_q0.90$rho_dias$rho_bay_dia), 
+     rho_q0.90$rho_dias$rho_bay_dia, type = "l", xlab = "l", 
+     ylab = expression(rho[l](0.90)),
+     ylim=c(0.75,1),
      main = 'Desagregación por días')
-abline(h=0.95,col='red')
+abline(h=0.90,col='red')
 
-plot(1:length(rho_q0.95$rho_años$rho_bay_year), 
-     rho_q0.95$rho_años$rho_bay_year, type = "l", xlab = "t", 
-     ylab = expression(rho[t](0.95)),
-     ylim=c(0.85,1),
+plot(1:length(rho_q0.90$rho_años$rho_bay_year), 
+     rho_q0.90$rho_años$rho_bay_year, type = "l", xlab = "t", 
+     ylab = expression(rho[t](0.90)),
+     ylim=c(0.75,1),
      main = 'Desagregación por años')
-abline(h=0.95,col='red')
+abline(h=0.90,col='red')
 
 
 png('rho_def.png', width = 2000*3/2, height = 2200*3/2, res = 150)
