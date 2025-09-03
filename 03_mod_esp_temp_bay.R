@@ -151,20 +151,20 @@ mod_q0.90_bay <- mod_bay(
   inic_procesos = inic_procesos_q0.90, 
   n.samples = 100000, 
   n.burnin = 100000, 
-  n.thin = 1000, 
+  n.thin = 100, 
   n.report = 1000)
 
 mod_q0.75_bay <- mod_bay(
   formula = formula_q0.75, 
   data = v_q0.75, 
-  tau = 0.95, 
+  tau = 0.75, 
   vars = vars_q0.75, 
   coords = coords_km, 
   start_beta = start_beta_q0.75, 
   inic_procesos = inic_procesos_q0.75, 
   n.samples = 100000, 
   n.burnin = 100000, 
-  n.thin = 1000, 
+  n.thin = 100, 
   n.report = 1000)
 
 
@@ -323,7 +323,7 @@ predictions <- function(vars, betas, df, cuantil){
       #   pred[j]<-comp_esp+comp_fija + betas[i,'elev']*elev_sc[i] + betas[i,'dist']*dist_sc[i]
       # }
       
-      if (cuantil == 0.95){
+      if (cuantil == 0.95 || cuantil == 0.90 || cuantil == 0.75){
         pred[j] <- comp_esp + comp_fija + betas[i, 'elev'] * elev_sc[i] + betas[i, 'dist'] * dist_sc[i]
       }
       
@@ -333,13 +333,13 @@ predictions <- function(vars, betas, df, cuantil){
   return(pred)
 }
 
-pred_q0.95 <- predictions(vars, mod_q0.95_bay, betas_q0.95, v_q0.95, cuantil = 0.95)
+pred_q0.95 <- predictions(vars, betas_q0.95, v_q0.95, cuantil = 0.95)
 pred_q0.95 <- cbind(v_q0.95[,c('Date', 'station', 'Y')], pred_q0.95)
 
-pred_q0.90 <- predictions(vars_q0.90, mod_q0.90_bay, betas_q0.90, v_q0.90, cuantil = 0.90)
+pred_q0.90 <- predictions(vars_q0.90, betas_q0.90, v_q0.90, cuantil = 0.90)
 pred_q0.90 <- cbind(v_q0.90[,c('Date', 'station', 'Y')], pred_q0.90)
 
-pred_q0.75 <- predictions(vars_q0.75, mod_q0.75_bay, betas_q0.75, v_q0.75, cuantil = 0.75)
+pred_q0.75 <- predictions(vars_q0.75, betas_q0.75, v_q0.75, cuantil = 0.75)
 pred_q0.75 <- cbind(v_q0.75[,c('Date', 'station', 'Y')], pred_q0.75)
 
 # save(Y, df_final, stations, stations_dist, 
