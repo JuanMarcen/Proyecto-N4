@@ -25,7 +25,7 @@ european_union_map <-
 background <- st_transform(european_union_map, 2062)
 
 # mapa España con puntos
-spain_points <- function(values, stations, title, title_legend){
+spain_points <- function(values, stations, threshold, title, title_legend){
   
   spain <- ne_countries(scale = "medium", returnclass = "sf") %>%
     filter(admin == "Spain")
@@ -38,7 +38,7 @@ spain_points <- function(values, stations, title, title_legend){
   data_sf <- st_as_sf(data, coords = c("Longitude", "Latitude"), crs = 4326)
   
   # Extraer puntos que superan el umbral
-  highlight_df <- subset(data, values > 0.05)
+  highlight_df <- subset(data, values > threshold)
   
   # Convertimos coordenadas para que estén en el mismo sistema que el mapa (EPSG:2062)
   highlight_sf <- st_as_sf(highlight_df, coords = c("Longitude", "Latitude"), crs = 4326)

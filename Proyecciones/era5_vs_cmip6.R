@@ -119,7 +119,7 @@ l <- 152:243 # days
 harm <- cs(l, 1) # same for all
 
 l <- rep(l,times=30)
-harm <- matrix(rep(harm, times = 30), ncol = ncol(harm), byrow = FALSE)
+harm <- matrix(rep(harm, times = 30), ncol = ncol(harm), BHrow = FALSE)
 colnames(harm) <- c('c.1', 's.1')
 t <- year(g500_era5$Date) - 1960 + 1
 
@@ -193,14 +193,14 @@ ks_df_g500 <- ks_test_df(g500_era5, g500_cmip6)
 ks_df_g700 <- ks_test_df(g700_era5, g700_cmip6)
 
 source('mapa_Spain.R')
-ks_g500 <- spain_points(ks_df_g500$KSp, coord, 'KS Test g500 (crudo) 1981-2010', 'p-values')
-ks_g500_jun <- spain_points(ks_df_g500$jun.KSp, coord, 'KS Test June g500 (crudo) 1981-2010', 'p-values')
-ks_g500_jul <- spain_points(ks_df_g500$jul.KSp, coord, 'KS Test July g500 (crudo) 1981-2010', 'p-values')
-ks_g500_aug <- spain_points(ks_df_g500$aug.KSp, coord, 'KS Test August g500 (crudo) 1981-2010', 'p-values')
-ks_g700 <- spain_points(ks_df_g700$KSp, coord, 'KS Test g700 (crudo) 1981-2010', 'p-values')
-ks_g700_jun <- spain_points(ks_df_g700$jun.KSp, coord, 'KS Test June g700 (crudo) 1981-2010', 'p-values')
-ks_g700_jul <- spain_points(ks_df_g700$jul.KSp, coord, 'KS Test July g700 (crudo) 1981-2010', 'p-values')
-ks_g700_aug <- spain_points(ks_df_g700$aug.KSp, coord, 'KS Test August g700 (crudo) 1981-2010', 'p-values')
+ks_g500 <- spain_points(p.adjust(ks_df_g500$KSp, 'BH'), coord, 0.05, 'KS Test g500 (crudo) 1981-2010', 'p-values')
+ks_g500_jun <- spain_points(p.adjust(ks_df_g500$jun.KSp, 'BH'), coord, 0.05, 'KS Test June g500 (crudo) 1981-2010', 'p-values')
+ks_g500_jul <- spain_points(p.adjust(ks_df_g500$jul.KSp, 'BH'), coord, 0.05, 'KS Test July g500 (crudo) 1981-2010', 'p-values')
+ks_g500_aug <- spain_points(p.adjust(ks_df_g500$aug.KSp, 'BH'), coord, 0.05, 'KS Test August g500 (crudo) 1981-2010', 'p-values')
+ks_g700 <- spain_points(p.adjust(ks_df_g700$KSp, 'BH'), coord, 0.05, 'KS Test g700 (crudo) 1981-2010', 'p-values')
+ks_g700_jun <- spain_points(p.adjust(ks_df_g700$jun.KSp, 'BH'), coord, 0.05, 'KS Test June g700 (crudo) 1981-2010', 'p-values')
+ks_g700_jul <- spain_points(p.adjust(ks_df_g700$jul.KSp, 'BH'), coord, 0.05, 'KS Test July g700 (crudo) 1981-2010', 'p-values')
+ks_g700_aug <- spain_points(p.adjust(ks_df_g700$aug.KSp, 'BH'), coord, 0.05, 'KS Test August g700 (crudo) 1981-2010', 'p-values')
 
 ## Estandarización y comparación
 library(dplyr)
@@ -216,14 +216,14 @@ g700_cmip6_sc <- g700_cmip6 %>%
 ks_df_g500_sc <- ks_test_df(g500_era5_sc, g500_cmip6_sc)
 ks_df_g700_sc <- ks_test_df(g700_era5_sc, g700_cmip6_sc)
 
-ks_g500_sc <- spain_points(ks_df_g500_sc$KSp, coord, 'KS Test g500 (est) 1981-2010', 'p-values')
-ks_g500_sc_jun <- spain_points(ks_df_g500_sc$jun.KSp, coord, 'KS Test g500 June (est) 1981-2010', 'p-values')
-ks_g500_sc_jul <- spain_points(ks_df_g500_sc$jul.KSp, coord, 'KS Test g500 July (est) 1981-2010', 'p-values')
-ks_g500_sc_aug <- spain_points(ks_df_g500_sc$aug.KSp, coord, 'KS Test g500 August (est) 1981-2010', 'p-values')
-ks_g700_sc <- spain_points(ks_df_g700_sc$KSp, coord, 'KS Test g700 (est) 1981-2010', 'p-values')
-ks_g700_sc_jun <- spain_points(ks_df_g700_sc$jun.KSp, coord, 'KS Test g700 June (est) 1981-2010', 'p-values')
-ks_g700_sc_jul <- spain_points(ks_df_g700_sc$jul.KSp, coord, 'KS Test g700 July (est) 1981-2010', 'p-values')
-ks_g700_sc_aug <- spain_points(ks_df_g700_sc$aug.KSp, coord, 'KS Test g700 August (est) 1981-2010', 'p-values')
+ks_g500_sc <- spain_points(p.adjust(ks_df_g500_sc$KSp, 'BH'), coord, 0.05, 'KS Test g500 (est) 1981-2010', 'p-values')
+ks_g500_sc_jun <- spain_points(p.adjust(ks_df_g500_sc$jun.KSp, 'BH'), coord, 0.05, 'KS Test g500 June (est) 1981-2010', 'p-values')
+ks_g500_sc_jul <- spain_points(p.adjust(ks_df_g500_sc$jul.KSp, 'BH'), coord, 0.05, 'KS Test g500 July (est) 1981-2010', 'p-values')
+ks_g500_sc_aug <- spain_points(p.adjust(ks_df_g500_sc$aug.KSp, 'BH'), coord, 0.05, 'KS Test g500 August (est) 1981-2010', 'p-values')
+ks_g700_sc <- spain_points(p.adjust(ks_df_g700_sc$KSp, 'BH'), coord, 0.05, 'KS Test g700 (est) 1981-2010', 'p-values')
+ks_g700_sc_jun <- spain_points(p.adjust(ks_df_g700_sc$jun.KSp,'BH'), coord, 0.05, 'KS Test g700 June (est) 1981-2010', 'p-values')
+ks_g700_sc_jul <- spain_points(p.adjust(ks_df_g700_sc$jul.KSp, 'BH'), coord, 0.05, 'KS Test g700 July (est) 1981-2010', 'p-values')
+ks_g700_sc_aug <- spain_points(p.adjust(ks_df_g700_sc$aug.KSp, 'BH'), coord, 0.05, 'KS Test g700 August (est) 1981-2010', 'p-values')
 
 p_values_ref <- ggpubr::ggarrange(ks_g500, ks_g700, ks_g500_sc, ks_g700_sc, 
                                   nrow = 2, ncol = 2,
