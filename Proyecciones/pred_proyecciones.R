@@ -5,7 +5,7 @@ load('data_q0.95/proyecciones.RData')
 load('data_q0.90/proyecciones.RData')
 load('data_q0.75/proyecciones.RData')
 library(lubridate)
-
+library(dplyr)
 # anomalias estandarizadas según la regla utilizada para ajustar el modelo
 # (MPI - mean(ERA5)) / sd(ERA5)
 
@@ -26,21 +26,40 @@ fechas_cmip6 <- c(min(df_final_proy$Date), max(df_final_proy$Date))
 # load('data.RData')
 pred_q0.95_era5 <- pred_q0.95[which(pred_q0.95$Date >= fechas_cmip6[1] & pred_q0.95$Date <= fechas_cmip6[2]), ]
 pred_q0.95_comp <- cbind(pred_q0.95_era5, pred_q0.95_proy, pred_q0.95_proy_est)
+# meses moviles. Indicadores de nuevos meses 16 jun- 15 jul. 16 jul-15 ag
+# pred_q0.95_comp <- pred_q0.95_comp %>%
+#   mutate(
+#     day = day(Date),
+#     month = month(Date),
+#     
+#     month.aux = case_when(
+#       (month == 6 & day >= 15) | (month == 7 & day <= 15) ~ 1,
+#       (month == 7 & day >= 16) | (month == 8 & day <= 15) ~ 2,
+#       TRUE ~ 0
+#     )
+#   )
+# saveRDS(pred_q0.95_comp, 'data_q0.95/pred_q0.95_comp.rds')
+pred_q0.95_comp <- readRDS('data_q0.95/pred_q0.95_comp.rds')
 pred_q0.95_comp_ref <- pred_q0.95_comp[which(pred_q0.95_comp$Date >= '1981-06-01' &
                                                pred_q0.95_comp$Date <= '2010-08-31'), ]
 
 pred_q0.90_era5 <- pred_q0.90[which(pred_q0.90$Date >= fechas_cmip6[1] & pred_q0.90$Date <= fechas_cmip6[2]), ]
 pred_q0.90_comp <- cbind(pred_q0.90_era5, pred_q0.90_proy, pred_q0.90_proy_est)
+# pred_q0.90_comp$month.aux <- pred_q0.95_comp$month.aux
+# saveRDS(pred_q0.90_comp, 'data_q0.90/pred_q0.90_comp.rds')
+pred_q0.90_comp <- readRDS('data_q0.90/pred_q0.90_comp.rds')
 pred_q0.90_comp_ref <- pred_q0.90_comp[which(pred_q0.90_comp$Date >= '1981-06-01' &
                                                pred_q0.90_comp$Date <= '2010-08-31'), ]
 
 pred_q0.75_era5 <- pred_q0.75[which(pred_q0.75$Date >= fechas_cmip6[1] & pred_q0.75$Date <= fechas_cmip6[2]), ]
 pred_q0.75_comp <- cbind(pred_q0.75_era5, pred_q0.75_proy, pred_q0.75_proy_est)
+# pred_q0.75_comp$month.aux <- pred_q0.95_comp$month.aux
+# saveRDS(pred_q0.75_comp, 'data_q0.75/pred_q0.75_comp.rds')
+pred_q0.75_comp <- readRDS('data_q0.75/pred_q0.75_comp.rds')
 pred_q0.75_comp_ref <- pred_q0.75_comp[which(pred_q0.75_comp$Date >= '1981-06-01' &
                                                pred_q0.75_comp$Date <= '2010-08-31'), ]
 
-saveRDS(pred_q0.90_comp, 'data_q0.90/pred_q0.90_comp.rds')
-saveRDS(pred_q0.75_comp, 'data_q0.75/pred_q0.75_comp.rds')
+
 
 # solo para q0.95. Para resto cuantiles solo lo hacemos en el periodo de referencia
 p1 <- which(year(pred_q0.95_comp$Date) >= '1960'
@@ -55,6 +74,9 @@ p_ref <- which(year(pred_q0.95_comp$Date) >= '1981'
 p_ref_post <- which(year(pred_q0.95_comp$Date) >= '2011')
 
 # hacer qqplots para periodos antes y depsues del periodo de referencia
+
+
+
 
 #----DENSIDADES----
 density_plots <- function(data, col1, col2, col3, 
@@ -358,6 +380,311 @@ density_plots(pred_q0.75_comp_ref,
               type = 'months',
               month = '08')
 dev.off()
+
+#----DENSITY OVERLAPPING----
+library(overlapping)
+basura <- overlap(list(ERA5 = pred_q0.95_comp_ref$pred_q0.95[ind],
+                       CMIP6 = pred_q0.95_comp_ref$pred_q0.95_proy[ind],
+                       `CMIP6 (est)` = pred_q0.95_comp_ref$pred_q0.95_proy_est[ind]),
+                  type = '1',
+                  plot = T)
+# overlapping function for the reference period
+overlap_dens <- function(data, era5, cmip6, cmip6_est){
+  
+  df <- data.frame(matrix(NA, ncol = 2, nrow = dim(stations)[1]))
+  colnames(df) <- c('STAID', 'NAME2')
+  df$STAID <- stations$STAID
+  df$NAME2 <- stations$NAME2
+  
+  for (i in 1:dim(stations)[1]){
+    # whole period
+    ind <- which(data$station == stations$STAID[i])
+    name <- stations$NAME2[i]
+    id <- stations$STAID[i]
+    
+    ov <- overlap(
+      list(ERA5 = data[ind, era5],
+           CMIP6 = data[ind, cmip6],
+           `CMIP6 (est)` = data[ind, cmip6_est]),
+      type = '1'
+    )
+    
+    df[i, 'ERA5-CMIP6'] <- ov$OVPairs[1]
+    df[i, 'ERA5-CMIP6(est)'] <- ov$OVPairs[2]
+    df[i, 'dif.CMIP6'] <- ov$OVPairs[1] - ov$OVPairs[2]
+    #months
+    for (m in c('06', '07', '08')){
+      
+      data.aux <- data %>%
+        filter(station == stations$STAID[i],
+               format(Date, "%m") == m)
+      
+      ov.m <- overlap(
+        list(ERA5 = data.aux[[era5]],
+             CMIP6 = data.aux[[cmip6]],
+             `CMIP6 (est)` = data.aux[[cmip6_est]]),
+        type = '1'
+      )
+      
+      mm.aux <- month.abb[as.integer(m)]
+      
+      df[i, paste0(mm.aux, '.ERA5-CMIP6')] <- ov.m$OVPairs[1]
+      df[i, paste0(mm.aux, '.ERA5-CMIP6(est)')] <- ov.m$OVPairs[2]
+      df[i, paste0('dif.', mm.aux, '.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
+  
+    }
+    
+    #auxiliary momths
+    for (m in c(1, 2)){
+      
+      data.aux <- data %>%
+        filter(station == stations$STAID[i],
+               month.aux == m)
+      
+      ov.m <- overlap(
+        list(ERA5 = data.aux[[era5]],
+             CMIP6 = data.aux[[cmip6]],
+             `CMIP6 (est)` = data.aux[[cmip6_est]]),
+        type = '1'
+      )
+      
+      if (m == 1){
+        mm.aux <- '15jun.15jul'
+      }else if(m == 2){
+        mm.aux <- '16jul.15aug'
+      }
+      
+      
+      df[i, paste0(mm.aux, '.ERA5-CMIP6')] <- ov.m$OVPairs[1]
+      df[i, paste0(mm.aux, '.ERA5-CMIP6(est)')] <- ov.m$OVPairs[2]
+      df[i, paste0('dif.', mm.aux, '.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
+      
+    }
+  }
+  
+  
+  return(df)
+  
+}
+
+ov_dens_q0.95 <- overlap_dens(pred_q0.95_comp_ref, 'pred_q0.95', 
+                              'pred_q0.95_proy', 'pred_q0.95_proy_est')
+ov_dens_q0.90 <- overlap_dens(pred_q0.90_comp_ref, 'pred_q0.90', 
+                              'pred_q0.90_proy', 'pred_q0.90_proy_est')
+ov_dens_q0.75 <- overlap_dens(pred_q0.75_comp_ref, 'pred_q0.75', 
+                              'pred_q0.75_proy', 'pred_q0.75_proy_est')
+
+source('mapa_Spain.R')
+mapa_ov <- function(ov_dens){
+  m1 <- spain_points(ov_dens$`ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6', 'Overlap')
+  m2 <- spain_points(ov_dens$`ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est)', 'Overlap')
+  m3 <- spain_points(ov_dens$dif.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6', 'Diferencia overlap', dif = TRUE)
+  
+  m_total <- ggpubr::ggarrange(m1, m2, m3, 
+                         nrow = 1, ncol = 3,
+                         common.legend = F, legend = 'bottom')
+  
+  m1 <- spain_points(ov_dens$`Jun.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Junio', 'Overlap')
+  m2 <- spain_points(ov_dens$`Jun.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Junio', 'Overlap')
+  m3 <- spain_points(ov_dens$dif.Jun.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Junio', 'Diferencia overlap', dif = TRUE)
+  
+  m_junio <- ggpubr::ggarrange(m1, m2, m3, 
+                               nrow = 1, ncol = 3,
+                               common.legend = F, legend = 'bottom')
+  
+  m1 <- spain_points(ov_dens$`Jul.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Julio', 'Overlap')
+  m2 <- spain_points(ov_dens$`Jul.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Julio', 'Overlap')
+  m3 <- spain_points(ov_dens$dif.Jul.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Julio', 'Diferencia overlap', dif = TRUE)
+  
+  m_julio <- ggpubr::ggarrange(m1, m2, m3, 
+                               nrow = 1, ncol = 3,
+                               common.legend = F, legend = 'bottom')
+  
+  m1 <- spain_points(ov_dens$`Aug.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Agosto', 'Overlap')
+  m2 <- spain_points(ov_dens$`Aug.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Agosto', 'Overlap')
+  m3 <- spain_points(ov_dens$dif.Aug.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Agosto', 'Diferencia overlap', dif = TRUE)
+  
+  m_agosto <- ggpubr::ggarrange(m1, m2, m3, 
+                               nrow = 1, ncol = 3,
+                               common.legend = F, legend = 'bottom')
+  
+  m1 <- spain_points(ov_dens$`15jun.15jul.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 15 junio - 15 julio', 'Overlap')
+  m2 <- spain_points(ov_dens$`15jun.15jul.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) 15 junio - 15 julio', 'Overlap')
+  m3 <- spain_points(ov_dens$dif.15jun.15jul.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 15 junio - 15 julio', 'Diferencia overlap', dif = TRUE)
+  
+  m_15jun.15jul <- ggpubr::ggarrange(m1, m2, m3, 
+                               nrow = 1, ncol = 3,
+                               common.legend = F, legend = 'bottom')
+  
+  m1 <- spain_points(ov_dens$`16jul.15aug.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 16 julio - 15 agosto', 'Overlap')
+  m2 <- spain_points(ov_dens$`16jul.15aug.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) 16 julio - 15 agosto', 'Overlap')
+  m3 <- spain_points(ov_dens$dif.16jul.15aug.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 16 julio - 15 agosto', 'Diferencia overlap', dif = TRUE)
+  
+  m_16jul.15ag <- ggpubr::ggarrange(m1, m2, m3, 
+                               nrow = 1, ncol = 3,
+                               common.legend = F, legend = 'bottom')
+  
+  
+  return(list(
+    total = m_total,
+    junio = m_junio,
+    julio = m_julio,
+    agosto = m_agosto,
+    `15jun.15jul` = m_15jun.15jul,
+    `16jul.15aug` = m_16jul.15ag
+  ))
+}
+
+mapa_ov_q0.95 <- mapa_ov(ov_dens_q0.95)
+mapa_ov_q0.90 <- mapa_ov(ov_dens_q0.90)
+mapa_ov_q0.75 <- mapa_ov(ov_dens_q0.75)
+
+#saving graphs q0.95
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_total_q0.95.png", 
+  plot = mapa_ov_q0.95$total, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_junio_q0.95.png", 
+  plot = mapa_ov_q0.95$junio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_julio_q0.95.png", 
+  plot = mapa_ov_q0.95$julio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_agosto_q0.95.png", 
+  plot = mapa_ov_q0.95$agosto, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_15jun.15jul_q0.95.png", 
+  plot = mapa_ov_q0.95$`15jun.15jul`, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_16jul.15aug_q0.95.png", 
+  plot = mapa_ov_q0.95$`16jul.15aug`, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+# 0.90
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_total_q0.90.png", 
+  plot = mapa_ov_q0.90$total, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_junio_q0.90.png", 
+  plot = mapa_ov_q0.90$junio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_julio_q0.90.png", 
+  plot = mapa_ov_q0.90$julio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_agosto_q0.90.png", 
+  plot = mapa_ov_q0.90$agosto, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_15jun.15jul_q0.90.png", 
+  plot = mapa_ov_q0.90$`15jun.15jul`, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_16jul.15aug_q0.90.png", 
+  plot = mapa_ov_q0.90$`16jul.15aug`, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+# 0.75
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_total_q0.75.png", 
+  plot = mapa_ov_q0.75$total, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_junio_q0.75.png", 
+  plot = mapa_ov_q0.75$junio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_julio_q0.75.png", 
+  plot = mapa_ov_q0.75$julio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_agosto_q0.75.png", 
+  plot = mapa_ov_q0.75$agosto, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_15jun.15jul_q0.75.png", 
+  plot = mapa_ov_q0.75$`15jun.15jul`, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/overlaps/dens_ov_16jul.15aug_q0.75.png", 
+  plot = mapa_ov_q0.75$`16jul.15aug`, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
 
 #----QQPLOTS----
 #convertir a FUNCION 
@@ -805,6 +1132,34 @@ ks_test_df <- function(data, data_ref, type, pred, pred_proy){
                          & format(data_ref$Date, '%m') == month)
         
         mm_aux <- month.abb[as.integer(month)]
+        ks <- ks.test(data[ind, pred], data[ind, pred_proy])
+        
+        ks_df[i, paste0(mm_aux, '.KS')] <- ks$statistic
+        ks_df[i, paste0(mm_aux, '.KSp')] <- ks$p.value
+        
+        ks_ref <- ks.test(data_ref[ind_ref, pred], data_ref[ind_ref, pred_proy])
+        
+        ks_df[i, paste0(mm_aux, '.KS_ref')] <- ks_ref$statistic
+        ks_df[i, paste0(mm_aux, '.KSp_ref')] <- ks_ref$p.value
+      }
+    }
+    
+    for (i in 1:dim(stations)[1]){
+      
+      for (month in c(1,2)){
+        
+        ind <- which(data$station == stations$STAID[i] 
+                     & month.aux == month)
+        
+        ind_ref <- which(data_ref$station == stations$STAID[i] 
+                         & month.aux == month)
+        
+        if (month == 1){
+          mm.aux <- '15jun.15jul'
+        }else if(month == 2){
+          mm.aux <- '16jul.15aug'
+        }
+        
         ks <- ks.test(data[ind, pred], data[ind, pred_proy])
         
         ks_df[i, paste0(mm_aux, '.KS')] <- ks$statistic
