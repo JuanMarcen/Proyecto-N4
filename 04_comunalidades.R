@@ -1,0 +1,1 @@
+# estudio de comunalidades en las variables escogidas

@@ -1149,15 +1149,15 @@ ks_test_df <- function(data, data_ref, type, pred, pred_proy){
       for (month in c(1,2)){
         
         ind <- which(data$station == stations$STAID[i] 
-                     & month.aux == month)
+                     & data$month.aux == month)
         
         ind_ref <- which(data_ref$station == stations$STAID[i] 
-                         & month.aux == month)
+                         & data$month.aux == month)
         
         if (month == 1){
-          mm.aux <- '15jun.15jul'
+          mm_aux <- '15jun.15jul'
         }else if(month == 2){
-          mm.aux <- '16jul.15aug'
+          mm_aux <- '16jul.15aug'
         }
         
         ks <- ks.test(data[ind, pred], data[ind, pred_proy])
