@@ -75,9 +75,6 @@ p_ref_post <- which(year(pred_q0.95_comp$Date) >= '2011')
 
 # hacer qqplots para periodos antes y depsues del periodo de referencia
 
-
-
-
 #----DENSIDADES----
 density_plots <- function(data, col1, col2, col3, 
                           type = NULL, month = NULL, period = NULL){
@@ -1462,3 +1459,62 @@ for (i in 1:dim(stations)[1]){
   medias_anuales(pred_q0.95_comp_ref, i)
 }
 dev.off()
+
+#----PREDICCIONES COMPLETAS (UTILIZAR TODA CADENA)----
+rm(list = ls())
+library(coda)
+library(lubridate)
+load('data_q0.95/data.RData')
+load('data_q0.95/proyecciones.RData')
+orden <- readRDS("C:/Users/jumar/OneDrive/Escritorio/TFM/Datos/orden.rds")
+
+source('05_pred.completa.R')
+
+pred.q0.95.23jun <- pred.fecha(v_q0.95,
+                              mod_q0.95_bay,
+                              vars,
+                              1981,
+                              2010,
+                             paste(1:31),
+                              '7')
+colnames(pred.q0.95.23jun) <- stations$NAME2
+
+pred.q0.95.23jun.proy <- pred.fecha(v_q0.95_proy,
+                              mod_q0.95_bay,
+                              vars,
+                              1981,
+                              2010,
+                              paste(1:31),
+                              '7')
+colnames(pred.q0.95.23jun.proy) <- stations$NAME2
+
+IC.q0.95 <- IC(pred.q0.95.23jun)
+IC.q0.95.proy <- IC(pred.q0.95.23jun.proy)
+
+library(ggplot2)
+library(reshape2)
+
+fig.IC <- function(IC, IC.proy){
+  df1 <- data.frame(t(IC[, orden]))
+  df1$estacion <- rownames(df1)
+  colnames(df1) <- c("low", "high", "estacion")
+  df1$tipo <- "IC ERA5"
+  
+  df2 <- data.frame(t(IC.proy[, orden]))
+  df2$estacion <- rownames(df2)
+  colnames(df2) <- c("low", "high", "estacion")
+  df2$tipo <- "IC MPI"
+  
+  # Combino
+  df_all <- rbind(df1, df2)
+  df_all$estacion <- factor(df_all$estacion, levels = orden)
+  # Grafico
+  ggplot(df_all, aes(x = estacion, ymin = low, ymax = high, color = tipo)) +
+    geom_errorbar(position = position_dodge(width = 0.5), width = 0.3, size = 1) +
+    labs(title = "Intervalos de confianza por estación",
+         x = "Estación", y = "Valor") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+fig.IC(IC.q0.95, IC.q0.95.proy)
