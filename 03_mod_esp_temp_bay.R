@@ -204,6 +204,7 @@ save(Y, df_final, stations, stations_dist,
      vars_q0.90, v_q0.90,
      modelos_finales_q0.90,
      formula_q0.90, mod_q0.90_bay, elev_sc, dist_sc,
+     escalado_info_q0.90,
      file = 'data_q0.95/data.RData')
 
 save(Y, df_final, stations, stations_dist,
@@ -211,6 +212,7 @@ save(Y, df_final, stations, stations_dist,
      vars_q0.75, v_q0.75,
      modelos_finales_q0.75,
      formula_q0.75, mod_q0.75_bay, elev_sc, dist_sc,
+     escalado_info_q0.75,
      file = 'data_q0.75/data.RData')
 
 # nombres de columna a poly
