@@ -1972,3 +1972,189 @@ ggsave(
 )
 
 
+
+#----comp. futuros. décadas----
+dec1 <- which(year(pred_q0.95_comp_fut$Date) >= '2031'
+            & year(pred_q0.95_comp_fut$Date) <= '2040')
+dec2 <- which(year(pred_q0.95_comp_fut$Date) >= '2041'
+            & year(pred_q0.95_comp_fut$Date) <= '2050')
+dec3 <- which(year(pred_q0.95_comp_fut$Date) >= '2051')
+
+pred_q0.95_comp_fut_dec <- data.frame(
+  Date = rep(
+    as.Date(paste0("2031-", unique(format(pred_q0.95_comp_fut$Date, "%m-%d")))),
+    times = 10*40
+  ),
+  station = rep(stations$STAID, each = 10*91),
+  dec1 = pred_q0.95_comp_fut$pred_q0.95_proy_fut[dec1],
+  dec2 = pred_q0.95_comp_fut$pred_q0.95_proy_fut[dec2],
+  dec3 = pred_q0.95_comp_fut$pred_q0.95_proy_fut[dec3]
+)
+
+pred_q0.90_comp_fut_dec <- data.frame(
+  Date = rep(
+    as.Date(paste0("2031-", unique(format(pred_q0.90_comp_fut$Date, "%m-%d")))),
+    times = 10*40
+  ),
+  station = rep(stations$STAID, each = 10*91),
+  dec1 = pred_q0.90_comp_fut$pred_q0.90_proy_fut[dec1],
+  dec2 = pred_q0.90_comp_fut$pred_q0.90_proy_fut[dec2],
+  dec3 = pred_q0.90_comp_fut$pred_q0.90_proy_fut[dec3]
+)
+
+pred_q0.75_comp_fut_dec <- data.frame(
+  Date = rep(
+    as.Date(paste0("2031-", unique(format(pred_q0.75_comp_fut$Date, "%m-%d")))),
+    times = 10*40
+  ),
+  station = rep(stations$STAID, each = 10*91),
+  dec1 = pred_q0.75_comp_fut$pred_q0.75_proy_fut[dec1],
+  dec2 = pred_q0.75_comp_fut$pred_q0.75_proy_fut[dec2],
+  dec3 = pred_q0.75_comp_fut$pred_q0.75_proy_fut[dec3]
+)
+
+
+
+legend.fut <- c('2031-2040', '2041-2050', '2051-2060')
+title <- 'Análisis de décadas'
+
+#q0.95
+png('Proyecciones/futuro/q0.95/dens_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.95/dens_jun_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut, 
+              type = 'months',
+              month = '06',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.95/dens_jul_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              type = 'months',
+              month = '07',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.95/dens_aug_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              type = 'months',
+              month = '08',
+              title = title)
+dev.off()
+
+#q0.90
+png('Proyecciones/futuro/q0.90/dens_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.90/dens_jun_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut, 
+              type = 'months',
+              month = '06',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.90/dens_jul_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              type = 'months',
+              month = '07',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.90/dens_aug_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              type = 'months',
+              month = '08',
+              title = title)
+dev.off()
+
+#q0.75
+png('Proyecciones/futuro/q0.75/dens_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.75/dens_jun_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut, 
+              type = 'months',
+              month = '06',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.75/dens_jul_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              type = 'months',
+              month = '07',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.75/dens_aug_dec.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut_dec, 
+              'dec1', 
+              'dec2',
+              'dec3',
+              legend = legend.fut,
+              type = 'months',
+              month = '08',
+              title = title)
+dev.off()
