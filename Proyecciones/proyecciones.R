@@ -642,7 +642,7 @@ v_proy_est <- function(vars, v_proy, df_cmip6, df.mod){
   
       formula <- as.formula(paste(var_clean, "~ s.1 + c.1"))
       mod <- lm(formula, data = df.mod[ind,], subset = ind_jja)
-      mod2<- lm(formula, data = df.mod[ind,], subset = ind_jja)
+      mod2<- lm(formula, data = df_era5[ind,], subset = ind_jja)
   
       if (es_cuadrado == FALSE){
         sigmas[ind_fut, paste0('sd_cmip6_', var)] <- summary(mod)$sigma

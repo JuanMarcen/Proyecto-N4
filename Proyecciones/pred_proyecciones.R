@@ -15,15 +15,25 @@ dist_sc <- scale(stations_dist$DIST)
 pred_q0.95_proy <- predictions(vars, betas_q0.95, v_q0.95_proy, cuantil = 0.95)
 pred_q0.95_proy_est <- predictions(vars, betas_q0.95, v_q0.95_proy_est, cuantil = 0.95)
 
+pred_q0.95_proy_fut <- predictions(vars, betas_q0.95, v_q0.95_proy_fut, cuantil = 0.95)
+pred_q0.95_proy_est_fut <- predictions(vars, betas_q0.95, v_q0.95_proy_est_fut, cuantil = 0.95)
+
 pred_q0.90_proy <- predictions(vars_q0.90, betas_q0.90, v_q0.90_proy, cuantil = 0.90)
 pred_q0.90_proy_est <- predictions(vars_q0.90, betas_q0.90, v_q0.90_proy_est, cuantil = 0.90)
+
+pred_q0.90_proy_fut <- predictions(vars_q0.90, betas_q0.90, v_q0.90_proy_fut, cuantil = 0.90)
+pred_q0.90_proy_est_fut <- predictions(vars_q0.90, betas_q0.90, v_q0.90_proy_est_fut, cuantil = 0.90)
 
 pred_q0.75_proy <- predictions(vars_q0.75, betas_q0.75, v_q0.75_proy, cuantil = 0.75)
 pred_q0.75_proy_est <- predictions(vars_q0.75, betas_q0.75, v_q0.75_proy_est, cuantil = 0.75)
 
+pred_q0.75_proy_fut <- predictions(vars_q0.75, betas_q0.75, v_q0.75_proy_fut, cuantil = 0.75)
+pred_q0.75_proy_est_fut <- predictions(vars_q0.75, betas_q0.75, v_q0.75_proy_est_fut, cuantil = 0.75)
+
 fechas_cmip6 <- c(min(df_final_proy$Date), max(df_final_proy$Date))
 
 # load('data.RData')
+# IR DIRECTAMENTE A LOS READRDS
 pred_q0.95_era5 <- pred_q0.95[which(pred_q0.95$Date >= fechas_cmip6[1] & pred_q0.95$Date <= fechas_cmip6[2]), ]
 pred_q0.95_comp <- cbind(pred_q0.95_era5, pred_q0.95_proy, pred_q0.95_proy_est)
 # meses moviles. Indicadores de nuevos meses 16 jun- 15 jul. 16 jul-15 ag
@@ -42,6 +52,21 @@ pred_q0.95_comp <- cbind(pred_q0.95_era5, pred_q0.95_proy, pred_q0.95_proy_est)
 pred_q0.95_comp <- readRDS('data_q0.95/pred_q0.95_comp.rds')
 pred_q0.95_comp_ref <- pred_q0.95_comp[which(pred_q0.95_comp$Date >= '1981-06-01' &
                                                pred_q0.95_comp$Date <= '2010-08-31'), ]
+#futuro
+pred_q0.95_comp_fut <- df_final_proy_fut[, c(2,1)]
+pred_q0.95_comp_fut$pred_q0.95_proy_fut <- pred_q0.95_proy_fut
+pred_q0.95_comp_fut$pred_q0.95_proy_est_fut <- pred_q0.95_proy_est_fut
+
+pred_q0.95_comp_fut <- pred_q0.95_comp_fut[which(pred_q0.95_comp_fut$Date >= '2031-06-01' &
+                                                   pred_q0.95_comp_fut$Date <= '2060-08-31'), ]
+
+aux <- pred_q0.95_comp_ref %>%
+  filter(format(Date, '%m-%d') != '06-01')
+
+pred_q0.95_comp_fut$pred_q0.95_proy_ref <- aux$pred_q0.95_proy
+#saveRDS(pred_q0.95_comp_fut, 'data_q0.95/pred_q0.95_comp_fut.rds')
+pred_q0.95_comp_fut <- readRDS('data_q0.95/pred_q0.95_comp_fut.rds')
+
 
 pred_q0.90_era5 <- pred_q0.90[which(pred_q0.90$Date >= fechas_cmip6[1] & pred_q0.90$Date <= fechas_cmip6[2]), ]
 pred_q0.90_comp <- cbind(pred_q0.90_era5, pred_q0.90_proy, pred_q0.90_proy_est)
@@ -50,6 +75,21 @@ pred_q0.90_comp <- cbind(pred_q0.90_era5, pred_q0.90_proy, pred_q0.90_proy_est)
 pred_q0.90_comp <- readRDS('data_q0.90/pred_q0.90_comp.rds')
 pred_q0.90_comp_ref <- pred_q0.90_comp[which(pred_q0.90_comp$Date >= '1981-06-01' &
                                                pred_q0.90_comp$Date <= '2010-08-31'), ]
+#futuro
+pred_q0.90_comp_fut <- df_final_proy_fut[, c(2,1)]
+pred_q0.90_comp_fut$pred_q0.90_proy_fut <- pred_q0.90_proy_fut
+pred_q0.90_comp_fut$pred_q0.90_proy_est_fut <- pred_q0.90_proy_est_fut
+
+pred_q0.90_comp_fut <- pred_q0.90_comp_fut[which(pred_q0.90_comp_fut$Date >= '2031-06-01' &
+                                                   pred_q0.90_comp_fut$Date <= '2060-08-31'), ]
+
+aux <- pred_q0.90_comp_ref %>%
+  filter(format(Date, '%m-%d') != '06-01')
+
+pred_q0.90_comp_fut$pred_q0.90_proy_ref <- aux$pred_q0.90_proy
+#saveRDS(pred_q0.90_comp_fut, 'data_q0.90/pred_q0.90_comp_fut.rds')
+pred_q0.90_comp_fut <- readRDS('data_q0.90/pred_q0.90_comp_fut.rds')
+
 
 pred_q0.75_era5 <- pred_q0.75[which(pred_q0.75$Date >= fechas_cmip6[1] & pred_q0.75$Date <= fechas_cmip6[2]), ]
 pred_q0.75_comp <- cbind(pred_q0.75_era5, pred_q0.75_proy, pred_q0.75_proy_est)
@@ -58,7 +98,20 @@ pred_q0.75_comp <- cbind(pred_q0.75_era5, pred_q0.75_proy, pred_q0.75_proy_est)
 pred_q0.75_comp <- readRDS('data_q0.75/pred_q0.75_comp.rds')
 pred_q0.75_comp_ref <- pred_q0.75_comp[which(pred_q0.75_comp$Date >= '1981-06-01' &
                                                pred_q0.75_comp$Date <= '2010-08-31'), ]
+#futuro
+pred_q0.75_comp_fut <- df_final_proy_fut[, c(2,1)]
+pred_q0.75_comp_fut$pred_q0.75_proy_fut <- pred_q0.75_proy_fut
+pred_q0.75_comp_fut$pred_q0.75_proy_est_fut <- pred_q0.75_proy_est_fut
 
+pred_q0.75_comp_fut <- pred_q0.75_comp_fut[which(pred_q0.75_comp_fut$Date >= '2031-06-01' &
+                                                   pred_q0.75_comp_fut$Date <= '2060-08-31'), ]
+
+aux <- pred_q0.75_comp_ref %>%
+  filter(format(Date, '%m-%d') != '06-01')
+
+pred_q0.75_comp_fut$pred_q0.75_proy_ref <- aux$pred_q0.75_proy
+#saveRDS(pred_q0.75_comp_fut, 'data_q0.75/pred_q0.75_comp_fut.rds')
+pred_q0.75_comp_fut <- readRDS('data_q0.75/pred_q0.75_comp_fut.rds')
 
 
 # solo para q0.95. Para resto cuantiles solo lo hacemos en el periodo de referencia
