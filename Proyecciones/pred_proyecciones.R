@@ -54,8 +54,8 @@ pred_q0.95_comp_ref <- pred_q0.95_comp[which(pred_q0.95_comp$Date >= '1981-06-01
                                                pred_q0.95_comp$Date <= '2010-08-31'), ]
 #futuro
 pred_q0.95_comp_fut <- df_final_proy_fut[, c(2,1)]
-pred_q0.95_comp_fut$pred_q0.95_proy_fut <- pred_q0.95_proy_fut
-pred_q0.95_comp_fut$pred_q0.95_proy_est_fut <- pred_q0.95_proy_est_fut
+pred_q0.95_comp_fut$pred_q0.95_proy_fut <- unlist(pred_q0.95_proy_fut)
+pred_q0.95_comp_fut$pred_q0.95_proy_est_fut <- unlist(pred_q0.95_proy_est_fut)
 
 pred_q0.95_comp_fut <- pred_q0.95_comp_fut[which(pred_q0.95_comp_fut$Date >= '2031-06-01' &
                                                    pred_q0.95_comp_fut$Date <= '2060-08-31'), ]
@@ -77,8 +77,8 @@ pred_q0.90_comp_ref <- pred_q0.90_comp[which(pred_q0.90_comp$Date >= '1981-06-01
                                                pred_q0.90_comp$Date <= '2010-08-31'), ]
 #futuro
 pred_q0.90_comp_fut <- df_final_proy_fut[, c(2,1)]
-pred_q0.90_comp_fut$pred_q0.90_proy_fut <- pred_q0.90_proy_fut
-pred_q0.90_comp_fut$pred_q0.90_proy_est_fut <- pred_q0.90_proy_est_fut
+pred_q0.90_comp_fut$pred_q0.90_proy_fut <- unlist(pred_q0.90_proy_fut)
+pred_q0.90_comp_fut$pred_q0.90_proy_est_fut <- unlist(pred_q0.90_proy_est_fut)
 
 pred_q0.90_comp_fut <- pred_q0.90_comp_fut[which(pred_q0.90_comp_fut$Date >= '2031-06-01' &
                                                    pred_q0.90_comp_fut$Date <= '2060-08-31'), ]
@@ -100,8 +100,8 @@ pred_q0.75_comp_ref <- pred_q0.75_comp[which(pred_q0.75_comp$Date >= '1981-06-01
                                                pred_q0.75_comp$Date <= '2010-08-31'), ]
 #futuro
 pred_q0.75_comp_fut <- df_final_proy_fut[, c(2,1)]
-pred_q0.75_comp_fut$pred_q0.75_proy_fut <- pred_q0.75_proy_fut
-pred_q0.75_comp_fut$pred_q0.75_proy_est_fut <- pred_q0.75_proy_est_fut
+pred_q0.75_comp_fut$pred_q0.75_proy_fut <- unlist(pred_q0.75_proy_fut)
+pred_q0.75_comp_fut$pred_q0.75_proy_est_fut <- unlist(pred_q0.75_proy_est_fut)
 
 pred_q0.75_comp_fut <- pred_q0.75_comp_fut[which(pred_q0.75_comp_fut$Date >= '2031-06-01' &
                                                    pred_q0.75_comp_fut$Date <= '2060-08-31'), ]
@@ -130,7 +130,9 @@ p_ref_post <- which(year(pred_q0.95_comp$Date) >= '2011')
 
 #----DENSIDADES----
 density_plots <- function(data, col1, col2, col3, 
-                          type = NULL, month = NULL, period = NULL){
+                          type = NULL, month = NULL, period = NULL,
+                          legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+                          title = 'Dens. ERA5 vs CMIP6'){
   if (is.null(type)){
     for (i in 1:dim(stations)[1]){
       ind <- which(data$station == stations$STAID[i])
@@ -150,13 +152,13 @@ density_plots <- function(data, col1, col2, col3,
                        to   = max(data[ind, col3]))
       
       plot(dens1, col = "blue", lwd = 2, 
-           main = paste0('Dens. ERA5 vs CMIP6 (', name, ')'),
+           main = paste(title, name),
            xlab = 'ºC',
            ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
       lines(dens2, col = "red", lwd = 2)
       lines(dens3, col = "darkgreen", lwd = 2)
       
-      legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+      legend("topleft", legend = legend,
              col = c("blue", "red", 'darkgreen'), lwd = 2)
       
     }
@@ -181,17 +183,17 @@ density_plots <- function(data, col1, col2, col3,
       
       mm.aux <- month.abb[as.integer(month)]
       plot(dens1, col = "blue", lwd = 2, 
-           main = paste0('Dens. ', mm.aux, ' ERA5 vs CMIP6 (', name, ')'),
+           main = paste(title, mm.aux, name),
            xlab = 'ºC',
            ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
       lines(dens2, col = "red", lwd = 2)
       lines(dens3, col = "darkgreen", lwd = 2)
       
-      legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+      legend("topleft", legend = legend,
              col = c("blue", "red", 'darkgreen'), lwd = 2)
       
     }
-  }else if (type == 'period' & !is.null(period)){
+  }else if (type == 'period' & !is.null(period)){ #solo para clima presente
     for (i in 1:dim(stations)[1]){
       data_period <- data[period, ]
       ind <- which(data_period$station == stations$STAID[i])
@@ -212,13 +214,13 @@ density_plots <- function(data, col1, col2, col3,
       
       period.aux <- c(min(year(data_period$Date)), max(year(data_period$Date)))
       plot(dens1, col = "blue", lwd = 2, 
-           main = paste0('Dens. ', period.aux[1], '-', period.aux[2], ' . ERA5 vs CMIP6 (', name, ')'),
+           main = paste('Dens. ', period.aux[1], '-', period.aux[2], ' . ERA5 vs CMIP6', name),
            xlab = 'ºC',
            ylim = c(0,max(dens1$y, dens2$y, dens3$y)))
       lines(dens2, col = "red", lwd = 2)
       lines(dens3, col = "darkgreen", lwd = 2)
       
-      legend("topleft", legend = c("ERA5", "CMIP6", 'CMIP6 (est)'),
+      legend("topleft", legend = legend,
              col = c("blue", "red", 'darkgreen'), lwd = 2)
       
     }
@@ -439,75 +441,156 @@ basura <- overlap(list(ERA5 = pred_q0.95_comp_ref$pred_q0.95[ind],
                   type = '1',
                   plot = T)
 # overlapping function for the reference period
-overlap_dens <- function(data, era5, cmip6, cmip6_est){
+overlap_dens <- function(data, era5, cmip6, cmip6_est, month.aux = TRUE, clima = 'present'){
   
-  df <- data.frame(matrix(NA, ncol = 2, nrow = dim(stations)[1]))
-  colnames(df) <- c('STAID', 'NAME2')
-  df$STAID <- stations$STAID
-  df$NAME2 <- stations$NAME2
-  
-  for (i in 1:dim(stations)[1]){
-    # whole period
-    ind <- which(data$station == stations$STAID[i])
-    name <- stations$NAME2[i]
-    id <- stations$STAID[i]
+  if (clima == 'present'){
+    df <- data.frame(matrix(NA, ncol = 2, nrow = dim(stations)[1]))
+    colnames(df) <- c('STAID', 'NAME2')
+    df$STAID <- stations$STAID
+    df$NAME2 <- stations$NAME2
     
-    ov <- overlap(
-      list(ERA5 = data[ind, era5],
-           CMIP6 = data[ind, cmip6],
-           `CMIP6 (est)` = data[ind, cmip6_est]),
-      type = '1'
-    )
-    
-    df[i, 'ERA5-CMIP6'] <- ov$OVPairs[1]
-    df[i, 'ERA5-CMIP6(est)'] <- ov$OVPairs[2]
-    df[i, 'dif.CMIP6'] <- ov$OVPairs[1] - ov$OVPairs[2]
-    #months
-    for (m in c('06', '07', '08')){
+    for (i in 1:dim(stations)[1]){
+      # whole period
+      ind <- which(data$station == stations$STAID[i])
+      name <- stations$NAME2[i]
+      id <- stations$STAID[i]
       
-      data.aux <- data %>%
-        filter(station == stations$STAID[i],
-               format(Date, "%m") == m)
-      
-      ov.m <- overlap(
-        list(ERA5 = data.aux[[era5]],
-             CMIP6 = data.aux[[cmip6]],
-             `CMIP6 (est)` = data.aux[[cmip6_est]]),
+      ov <- overlap(
+        list(ERA5 = data[ind, era5],
+             CMIP6 = data[ind, cmip6],
+             `CMIP6 (est)` = data[ind, cmip6_est]),
         type = '1'
       )
       
-      mm.aux <- month.abb[as.integer(m)]
-      
-      df[i, paste0(mm.aux, '.ERA5-CMIP6')] <- ov.m$OVPairs[1]
-      df[i, paste0(mm.aux, '.ERA5-CMIP6(est)')] <- ov.m$OVPairs[2]
-      df[i, paste0('dif.', mm.aux, '.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
-  
-    }
-    
-    #auxiliary momths
-    for (m in c(1, 2)){
-      
-      data.aux <- data %>%
-        filter(station == stations$STAID[i],
-               month.aux == m)
-      
-      ov.m <- overlap(
-        list(ERA5 = data.aux[[era5]],
-             CMIP6 = data.aux[[cmip6]],
-             `CMIP6 (est)` = data.aux[[cmip6_est]]),
-        type = '1'
-      )
-      
-      if (m == 1){
-        mm.aux <- '15jun.15jul'
-      }else if(m == 2){
-        mm.aux <- '16jul.15aug'
+      df[i, 'ERA5-CMIP6'] <- ov$OVPairs[1]
+      df[i, 'ERA5-CMIP6(est)'] <- ov$OVPairs[2]
+      df[i, 'dif.CMIP6'] <- ov$OVPairs[1] - ov$OVPairs[2]
+      #months
+      for (m in c('06', '07', '08')){
+        
+        data.aux <- data %>%
+          filter(station == stations$STAID[i],
+                 format(Date, "%m") == m)
+        
+        ov.m <- overlap(
+          list(ERA5 = data.aux[[era5]],
+               CMIP6 = data.aux[[cmip6]],
+               `CMIP6 (est)` = data.aux[[cmip6_est]]),
+          type = '1'
+        )
+        
+        mm.aux <- month.abb[as.integer(m)]
+        
+        df[i, paste0(mm.aux, '.ERA5-CMIP6')] <- ov.m$OVPairs[1]
+        df[i, paste0(mm.aux, '.ERA5-CMIP6(est)')] <- ov.m$OVPairs[2]
+        df[i, paste0('dif.', mm.aux, '.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
+        
       }
       
+      #auxiliary momths
+      if (month.aux == TRUE){
+        for (m in c(1, 2)){
+          
+          data.aux <- data %>%
+            filter(station == stations$STAID[i],
+                   month.aux == m)
+          
+          ov.m <- overlap(
+            list(ERA5 = data.aux[[era5]],
+                 CMIP6 = data.aux[[cmip6]],
+                 `CMIP6 (est)` = data.aux[[cmip6_est]]),
+            type = '1'
+          )
+          
+          if (m == 1){
+            mm.aux <- '15jun.15jul'
+          }else if(m == 2){
+            mm.aux <- '16jul.15aug'
+          }
+          
+          
+          df[i, paste0(mm.aux, '.ERA5-CMIP6')] <- ov.m$OVPairs[1]
+          df[i, paste0(mm.aux, '.ERA5-CMIP6(est)')] <- ov.m$OVPairs[2]
+          df[i, paste0('dif.', mm.aux, '.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
+          
+        }
+      }
       
-      df[i, paste0(mm.aux, '.ERA5-CMIP6')] <- ov.m$OVPairs[1]
-      df[i, paste0(mm.aux, '.ERA5-CMIP6(est)')] <- ov.m$OVPairs[2]
-      df[i, paste0('dif.', mm.aux, '.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
+    }
+  }
+  
+  if (clima == 'future'){
+    df <- data.frame(matrix(NA, ncol = 2, nrow = dim(stations)[1]))
+    colnames(df) <- c('STAID', 'NAME2')
+    df$STAID <- stations$STAID
+    df$NAME2 <- stations$NAME2
+    
+    for (i in 1:dim(stations)[1]){
+      # whole period
+      ind <- which(data$station == stations$STAID[i])
+      name <- stations$NAME2[i]
+      id <- stations$STAID[i]
+      
+      ov <- overlap(
+        list(ERA5 = data[ind, era5],
+             CMIP6 = data[ind, cmip6],
+             `CMIP6 (est)` = data[ind, cmip6_est]),
+        type = '1'
+      )
+      
+      df[i, '1981-2010 vs. 2031-2060'] <- ov$OVPairs[1]
+      df[i, '1981-2010 vs. 2031-2060(est)'] <- ov$OVPairs[2]
+      df[i, 'dif.fut.CMIP6'] <- ov$OVPairs[1] - ov$OVPairs[2]
+      #months
+      for (m in c('06', '07', '08')){
+        
+        data.aux <- data %>%
+          filter(station == stations$STAID[i],
+                 format(Date, "%m") == m)
+        
+        ov.m <- overlap(
+          list(ERA5 = data.aux[[era5]],
+               CMIP6 = data.aux[[cmip6]],
+               `CMIP6 (est)` = data.aux[[cmip6_est]]),
+          type = '1'
+        )
+        
+        mm.aux <- month.abb[as.integer(m)]
+        
+        df[i, paste0(mm.aux, '.1981-2010.vs.2031-2060')] <- ov.m$OVPairs[1]
+        df[i, paste0(mm.aux, '.1981-2010.vs.2031-2060 (est)')] <- ov.m$OVPairs[2]
+        df[i, paste0('dif.', mm.aux, '.fut.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
+        
+      }
+      
+      #auxiliary momths (en futuro no hay, asi que no cmabio nada)
+      if (month.aux == TRUE){
+        for (m in c(1, 2)){
+          
+          data.aux <- data %>%
+            filter(station == stations$STAID[i],
+                   month.aux == m)
+          
+          ov.m <- overlap(
+            list(ERA5 = data.aux[[era5]],
+                 CMIP6 = data.aux[[cmip6]],
+                 `CMIP6 (est)` = data.aux[[cmip6_est]]),
+            type = '1'
+          )
+          
+          if (m == 1){
+            mm.aux <- '15jun.15jul'
+          }else if(m == 2){
+            mm.aux <- '16jul.15aug'
+          }
+          
+          
+          df[i, paste0(mm.aux, '.ERA5-CMIP6')] <- ov.m$OVPairs[1]
+          df[i, paste0(mm.aux, '.ERA5-CMIP6(est)')] <- ov.m$OVPairs[2]
+          df[i, paste0('dif.', mm.aux, '.CMIP6')] <- ov.m$OVPairs[1] - ov.m$OVPairs[2]
+          
+        }
+      }
       
     }
   }
@@ -524,65 +607,119 @@ ov_dens_q0.90 <- overlap_dens(pred_q0.90_comp_ref, 'pred_q0.90',
 ov_dens_q0.75 <- overlap_dens(pred_q0.75_comp_ref, 'pred_q0.75', 
                               'pred_q0.75_proy', 'pred_q0.75_proy_est')
 
+ov_dens_q0.95_fut <- overlap_dens(pred_q0.95_comp_fut, 'pred_q0.95_proy_ref', 
+                              'pred_q0.95_proy_fut', 'pred_q0.95_proy_est_fut',
+                              month.aux = FALSE, clima = 'future')
+ov_dens_q0.90 <- overlap_dens(pred_q0.90_comp_ref, 'pred_q0.90', 
+                              'pred_q0.90_proy', 'pred_q0.90_proy_est')
+ov_dens_q0.75 <- overlap_dens(pred_q0.75_comp_ref, 'pred_q0.75', 
+                              'pred_q0.75_proy', 'pred_q0.75_proy_est')
+
+
 source('mapa_Spain.R')
-mapa_ov <- function(ov_dens){
-  m1 <- spain_points(ov_dens$`ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6', 'Overlap')
-  m2 <- spain_points(ov_dens$`ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est)', 'Overlap')
-  m3 <- spain_points(ov_dens$dif.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6', 'Diferencia overlap', dif = TRUE)
+mapa_ov <- function(ov_dens, clima = 'present'){
   
-  m_total <- ggpubr::ggarrange(m1, m2, m3, 
-                         nrow = 1, ncol = 3,
-                         common.legend = F, legend = 'bottom')
+  if (clima == 'present'){
+    m1 <- spain_points(ov_dens$`ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6', 'Overlap')
+    m2 <- spain_points(ov_dens$`ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est)', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6', 'Diferencia overlap', dif = TRUE)
+    
+    m_total <- ggpubr::ggarrange(m1, m2, m3, 
+                                 nrow = 1, ncol = 3,
+                                 common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`Jun.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Junio', 'Overlap')
+    m2 <- spain_points(ov_dens$`Jun.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Junio', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.Jun.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Junio', 'Diferencia overlap', dif = TRUE)
+    
+    m_junio <- ggpubr::ggarrange(m1, m2, m3, 
+                                 nrow = 1, ncol = 3,
+                                 common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`Jul.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Julio', 'Overlap')
+    m2 <- spain_points(ov_dens$`Jul.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Julio', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.Jul.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Julio', 'Diferencia overlap', dif = TRUE)
+    
+    m_julio <- ggpubr::ggarrange(m1, m2, m3, 
+                                 nrow = 1, ncol = 3,
+                                 common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`Aug.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Agosto', 'Overlap')
+    m2 <- spain_points(ov_dens$`Aug.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Agosto', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.Aug.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Agosto', 'Diferencia overlap', dif = TRUE)
+    
+    m_agosto <- ggpubr::ggarrange(m1, m2, m3, 
+                                  nrow = 1, ncol = 3,
+                                  common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`15jun.15jul.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 15 junio - 15 julio', 'Overlap')
+    m2 <- spain_points(ov_dens$`15jun.15jul.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) 15 junio - 15 julio', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.15jun.15jul.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 15 junio - 15 julio', 'Diferencia overlap', dif = TRUE)
+    
+    m_15jun.15jul <- ggpubr::ggarrange(m1, m2, m3, 
+                                       nrow = 1, ncol = 3,
+                                       common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`16jul.15aug.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 16 julio - 15 agosto', 'Overlap')
+    m2 <- spain_points(ov_dens$`16jul.15aug.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) 16 julio - 15 agosto', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.16jul.15aug.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 16 julio - 15 agosto', 'Diferencia overlap', dif = TRUE)
+    
+    m_16jul.15ag <- ggpubr::ggarrange(m1, m2, m3, 
+                                      nrow = 1, ncol = 3,
+                                      common.legend = F, legend = 'bottom')
+    
+    map_list <- list(
+      total = m_total,
+      junio = m_junio,
+      julio = m_julio,
+      agosto = m_agosto,
+      `15jun.15jul` = m_15jun.15jul,
+      `16jul.15aug` = m_16jul.15ag
+    )
+  }
   
-  m1 <- spain_points(ov_dens$`Jun.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Junio', 'Overlap')
-  m2 <- spain_points(ov_dens$`Jun.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Junio', 'Overlap')
-  m3 <- spain_points(ov_dens$dif.Jun.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Junio', 'Diferencia overlap', dif = TRUE)
+  if (clima == 'future'){
+    m1 <- spain_points(ov_dens$`1981-2010 vs. 2031-2060`, stations,  c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060', 'Overlap')
+    m2 <- spain_points(ov_dens$`1981-2010 vs. 2031-2060(est)`, stations, c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060(est)', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.fut.CMIP6, stations, c(-0.075, 0.075), 0.05, 0, 'dif. CMIP6', 'Diferencia overlap', dif = TRUE)
+    
+    m_total <- ggpubr::ggarrange(m1, m2, m3, 
+                                 nrow = 1, ncol = 3,
+                                 common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`Jun.1981-2010.vs.2031-2060`, stations,  c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060 Junio', 'Overlap')
+    m2 <- spain_points(ov_dens$`Jun.1981-2010.vs.2031-2060 (est)`, stations, c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060(est) Junio', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.Jun.fut.CMIP6, stations, c(-0.075, 0.075), 0.05, 0, 'dif. CMIP6 Junio', 'Diferencia overlap', dif = TRUE)
+    
+    m_junio <- ggpubr::ggarrange(m1, m2, m3, 
+                                 nrow = 1, ncol = 3,
+                                 common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`Jul.1981-2010.vs.2031-2060`, stations,  c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060 Julio', 'Overlap')
+    m2 <- spain_points(ov_dens$`Jul.1981-2010.vs.2031-2060 (est)`, stations, c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060(est) Julio', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.Jul.fut.CMIP6, stations, c(-0.075, 0.075), 0.05, 0, 'dif. CMIP6 Julio', 'Diferencia overlap', dif = TRUE)
+    
+    m_julio <- ggpubr::ggarrange(m1, m2, m3, 
+                                 nrow = 1, ncol = 3,
+                                 common.legend = F, legend = 'bottom')
+    
+    m1 <- spain_points(ov_dens$`Aug.1981-2010.vs.2031-2060`, stations,  c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060 Agosto', 'Overlap')
+    m2 <- spain_points(ov_dens$`Aug.1981-2010.vs.2031-2060 (est)`, stations, c(0.5, 1), 0.05, 0.95, '1981-2010 vs. 2031-2060(est) Agosto', 'Overlap')
+    m3 <- spain_points(ov_dens$dif.Aug.fut.CMIP6, stations, c(-0.075, 0.075), 0.05, 0, 'dif. CMIP6 Agosto', 'Diferencia overlap', dif = TRUE)
+    
+    m_agosto <- ggpubr::ggarrange(m1, m2, m3, 
+                                  nrow = 1, ncol = 3,
+                                  common.legend = F, legend = 'bottom')
+    
+    map_list <- list(
+      total = m_total,
+      junio = m_junio,
+      julio = m_julio,
+      agosto = m_agosto
+    )
+  }
   
-  m_junio <- ggpubr::ggarrange(m1, m2, m3, 
-                               nrow = 1, ncol = 3,
-                               common.legend = F, legend = 'bottom')
-  
-  m1 <- spain_points(ov_dens$`Jul.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Julio', 'Overlap')
-  m2 <- spain_points(ov_dens$`Jul.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Julio', 'Overlap')
-  m3 <- spain_points(ov_dens$dif.Jul.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Julio', 'Diferencia overlap', dif = TRUE)
-  
-  m_julio <- ggpubr::ggarrange(m1, m2, m3, 
-                               nrow = 1, ncol = 3,
-                               common.legend = F, legend = 'bottom')
-  
-  m1 <- spain_points(ov_dens$`Aug.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 Agosto', 'Overlap')
-  m2 <- spain_points(ov_dens$`Aug.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) Agosto', 'Overlap')
-  m3 <- spain_points(ov_dens$dif.Aug.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 Agosto', 'Diferencia overlap', dif = TRUE)
-  
-  m_agosto <- ggpubr::ggarrange(m1, m2, m3, 
-                               nrow = 1, ncol = 3,
-                               common.legend = F, legend = 'bottom')
-  
-  m1 <- spain_points(ov_dens$`15jun.15jul.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 15 junio - 15 julio', 'Overlap')
-  m2 <- spain_points(ov_dens$`15jun.15jul.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) 15 junio - 15 julio', 'Overlap')
-  m3 <- spain_points(ov_dens$dif.15jun.15jul.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 15 junio - 15 julio', 'Diferencia overlap', dif = TRUE)
-  
-  m_15jun.15jul <- ggpubr::ggarrange(m1, m2, m3, 
-                               nrow = 1, ncol = 3,
-                               common.legend = F, legend = 'bottom')
-  
-  m1 <- spain_points(ov_dens$`16jul.15aug.ERA5-CMIP6`, stations,  c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6 16 julio - 15 agosto', 'Overlap')
-  m2 <- spain_points(ov_dens$`16jul.15aug.ERA5-CMIP6(est)`, stations, c(0.8, 1), 0.05, 0.95, 'ERA5-CMIP6(est) 16 julio - 15 agosto', 'Overlap')
-  m3 <- spain_points(ov_dens$dif.16jul.15aug.CMIP6, stations, c(-0.05, 0.05), 0.05, 0, 'dif. CMIP6 16 julio - 15 agosto', 'Diferencia overlap', dif = TRUE)
-  
-  m_16jul.15ag <- ggpubr::ggarrange(m1, m2, m3, 
-                               nrow = 1, ncol = 3,
-                               common.legend = F, legend = 'bottom')
-  
-  
-  return(list(
-    total = m_total,
-    junio = m_junio,
-    julio = m_julio,
-    agosto = m_agosto,
-    `15jun.15jul` = m_15jun.15jul,
-    `16jul.15aug` = m_16jul.15ag
-  ))
+  return(map_list)
 }
 
 mapa_ov_q0.95 <- mapa_ov(ov_dens_q0.95)
@@ -1571,3 +1708,267 @@ fig.IC <- function(IC, IC.proy){
 }
 
 fig.IC(IC.q0.95, IC.q0.95.proy)
+
+
+#----DATOS FUTUROS----
+# cargar funciones de arriba
+# cambiar nombres de leyenda
+#----density---- 
+legend.fut <- c('1981-2010', '2031-2060', '2031-2060 (est)')
+title <- ('Dens. 1981-2010 vs 2031-2060')
+# q0.95
+png('Proyecciones/futuro/q0.95/dens.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut, 
+              'pred_q0.95_proy_ref', 
+              'pred_q0.95_proy_fut',
+              'pred_q0.95_proy_est_fut',
+              legend = legend.fut,
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.95/dens_jun.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut, 
+              'pred_q0.95_proy_ref', 
+              'pred_q0.95_proy_fut',
+              'pred_q0.95_proy_est_fut',
+              legend = legend.fut, 
+              type = 'months',
+              month = '06',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.95/dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut, 
+              'pred_q0.95_proy_ref', 
+              'pred_q0.95_proy_fut',
+              'pred_q0.95_proy_est_fut',
+              legend = legend.fut,
+              type = 'months',
+              month = '07',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.95/dens_aug.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.95_comp_fut, 
+              'pred_q0.95_proy_ref', 
+              'pred_q0.95_proy_fut',
+              'pred_q0.95_proy_est_fut',
+              legend = legend.fut,
+              type = 'months',
+              month = '08',
+              title = title)
+dev.off()
+
+# q0.90
+png('Proyecciones/futuro/q0.90/dens.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut, 
+              'pred_q0.90_proy_ref', 
+              'pred_q0.90_proy_fut',
+              'pred_q0.90_proy_est_fut',
+              legend = legend.fut,
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.90/dens_jun.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut, 
+              'pred_q0.90_proy_ref', 
+              'pred_q0.90_proy_fut',
+              'pred_q0.90_proy_est_fut',
+              legend = legend.fut, 
+              type = 'months',
+              month = '06',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.90/dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut, 
+              'pred_q0.90_proy_ref', 
+              'pred_q0.90_proy_fut',
+              'pred_q0.90_proy_est_fut',
+              legend = legend.fut,
+              type = 'months',
+              month = '07',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.90/dens_aug.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.90_comp_fut, 
+              'pred_q0.90_proy_ref', 
+              'pred_q0.90_proy_fut',
+              'pred_q0.90_proy_est_fut',
+              legend = legend.fut,
+              type = 'months',
+              month = '08',
+              title = title)
+dev.off()
+
+# q0.75
+png('Proyecciones/futuro/q0.75/dens.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut, 
+              'pred_q0.75_proy_ref', 
+              'pred_q0.75_proy_fut',
+              'pred_q0.75_proy_est_fut',
+              legend = legend.fut,
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.75/dens_jun.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut, 
+              'pred_q0.75_proy_ref', 
+              'pred_q0.75_proy_fut',
+              'pred_q0.75_proy_est_fut',
+              legend = legend.fut, 
+              type = 'months',
+              month = '06',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.75/dens_jul.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut, 
+              'pred_q0.75_proy_ref', 
+              'pred_q0.75_proy_fut',
+              'pred_q0.75_proy_est_fut',
+              legend = legend.fut,
+              type = 'months',
+              month = '07',
+              title = title)
+dev.off()
+
+png('Proyecciones/futuro/q0.75/dens_aug.png', width = 2000*3/3, height = 2200*3/2, res = 150)
+par(mfrow=c(10,4))
+density_plots(pred_q0.75_comp_fut, 
+              'pred_q0.75_proy_ref', 
+              'pred_q0.75_proy_fut',
+              'pred_q0.75_proy_est_fut',
+              legend = legend.fut,
+              type = 'months',
+              month = '08',
+              title = title)
+dev.off()
+
+#----overlaps----
+ov_dens_q0.95_fut <- overlap_dens(pred_q0.95_comp_fut, 'pred_q0.95_proy_ref', 
+                                  'pred_q0.95_proy_fut', 'pred_q0.95_proy_est_fut',
+                                  month.aux = FALSE, clima = 'future')
+ov_dens_q0.90_fut <- overlap_dens(pred_q0.90_comp_fut, 'pred_q0.90_proy_ref', 
+                                  'pred_q0.90_proy_fut', 'pred_q0.90_proy_est_fut',
+                                  month.aux = FALSE, clima = 'future')
+ov_dens_q0.75_fut <- overlap_dens(pred_q0.75_comp_fut, 'pred_q0.75_proy_ref', 
+                                  'pred_q0.75_proy_fut', 'pred_q0.75_proy_est_fut',
+                                  month.aux = FALSE, clima = 'future')
+
+mapa_ov_q0.95_fut <- mapa_ov(ov_dens_q0.95_fut, clima = 'future')
+mapa_ov_q0.90_fut <- mapa_ov(ov_dens_q0.90_fut, clima = 'future')
+mapa_ov_q0.75_fut <- mapa_ov(ov_dens_q0.75_fut, clima = 'future')
+
+#saving graphs q0.95
+ggsave(
+  filename = "Proyecciones/futuro/q0.95/ov_total_q0.95.png", 
+  plot = mapa_ov_q0.95_fut$total, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.95/ov_junio_q0.95.png", 
+  plot = mapa_ov_q0.95_fut$junio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.95/ov_julio_q0.95.png", 
+  plot = mapa_ov_q0.95_fut$julio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.95/ov_agosto_q0.95.png", 
+  plot = mapa_ov_q0.95_fut$agosto, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+#saving graphs q0.90
+ggsave(
+  filename = "Proyecciones/futuro/q0.90/ov_total_q0.90.png", 
+  plot = mapa_ov_q0.90_fut$total, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.90/ov_junio_q0.90.png", 
+  plot = mapa_ov_q0.90_fut$junio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.90/ov_julio_q0.90.png", 
+  plot = mapa_ov_q0.90_fut$julio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.90/ov_agosto_q0.90.png", 
+  plot = mapa_ov_q0.90_fut$agosto, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+#saving graphs q0.75
+ggsave(
+  filename = "Proyecciones/futuro/q0.75/ov_total_q0.75.png", 
+  plot = mapa_ov_q0.75_fut$total, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.75/ov_junio_q0.75.png", 
+  plot = mapa_ov_q0.75_fut$junio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.75/ov_julio_q0.75.png", 
+  plot = mapa_ov_q0.75_fut$julio, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+ggsave(
+  filename = "Proyecciones/futuro/q0.75/ov_agosto_q0.75.png", 
+  plot = mapa_ov_q0.75_fut$agosto, 
+  width = 12,
+  height = 5,     
+  dpi = 300       
+)
+
+
