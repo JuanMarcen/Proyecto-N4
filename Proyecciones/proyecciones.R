@@ -410,14 +410,14 @@ df_cmip6_fut <- df_proy_fut
 # cálculo local de anomalías. Ref 1981-2010
 # no estandarizadas
 for (i in 1:dim(stations)[1]){
-  ind <- which(df_proy$station == stations$STAID[i])
+  ind <- which(df_cmip6$station == stations$STAID[i])
   ind_fut <- which(df_proy_fut$station == stations$STAID[i])
-  ind_jja <- which(df_proy$t[ind] >= 22 & df_proy$t[ind] <= 51 & df_proy$l[ind] >= 152)
+  ind_jja <- which(df_cmip6$t[ind] >= 22 & df_cmip6$t[ind] <= 51 & df_cmip6$l[ind] >= 152)
   
   for (j in 4:13){
-    var <- names(df_proy)[j]
+    var <- names(df_cmip6)[j]
     formula <- as.formula(paste(var, "~ s.1 + c.1"))
-    mod <- lm(formula, data = df_proy[ind,], subset = ind_jja)
+    mod <- lm(formula, data = df_cmip6[ind,], subset = ind_jja)
     preds <- predict(mod, newdata = data.frame(
       c.1 = df_proy_fut$c.1[ind_fut], #prediccion anomalias segun el periodo de referencia
       s.1 = df_proy_fut$s.1[ind_fut]
@@ -484,8 +484,8 @@ for (j in 29:38){
 #----Dataframes finales----
 # guardado de solo las variables que se ajustan en el modelo
 escalado_info <- readRDS("data_q0.95/escalado_info.rds")
-df_era5 <- readRDS('data_q0.95/df_era5.rds')
-df_era5 <- df_era5[which(df_era5$Date >= fechas_cmip6[1] & df_era5$Date <= fechas_cmip6[2]),]
+df_era5_comp <- readRDS('data_q0.95/df_era5.rds')
+df_era5 <- df_era5_comp[which(df_era5_comp$Date >= fechas_cmip6[1] & df_era5_comp$Date <= fechas_cmip6[2]),]
 vars <- readRDS('data_q0.95/vars.rds')
 load('data_q0.90/data.RData')
 load('data_q0.75/data.RData')
@@ -503,6 +503,7 @@ rm(list = setdiff(ls(), c('stations',
                         'df_cmip6',
                         'df_cmip6_fut',
                         'df_era5',
+                        'df_era5_comp',
                         'escalado_info',
                         'escalado_info_q0.90',
                         'escalado_info_q0.75')))
@@ -654,6 +655,7 @@ v_proy_est <- function(vars, v_proy, df_cmip6, df.mod){
     }
   }
   
+  #sigmas <- sigmas[which(format(sigmas$Date, '%m-%d') != '05-31'), ]
   sigmas <- sigmas[which(format(sigmas$Date, '%m-%d') != '06-01'), ]
   
   v <- v_proy
@@ -669,6 +671,8 @@ v_q0.90_proy_est <- v_proy_est(vars_q0.90, v_q0.90_proy, df_cmip6, df_cmip6)
 v_q0.75_proy_est <- v_proy_est(vars_q0.75, v_q0.75_proy, df_cmip6, df_cmip6)
 
 v_q0.95_proy_est_fut <- v_proy_est(vars, v_q0.95_proy_fut, df_cmip6_fut, df_cmip6)
+v_q0.90_proy_est_fut <- v_proy_est(vars_q0.90, v_q0.90_proy_fut, df_cmip6_fut, df_cmip6)
+v_q0.75_proy_est_fut <- v_proy_est(vars_q0.75, v_q0.75_proy_fut, df_cmip6_fut, df_cmip6)
 
 save(stations,
      stations_dist,
@@ -678,6 +682,7 @@ save(stations,
      v_q0.95_proy,
      v_q0.95_proy_fut,
      v_q0.95_proy_est,
+     v_q0.95_proy_est_fut,
      Y,
      vars,
      file = 'data_q0.95/proyecciones.RData')
@@ -690,6 +695,7 @@ save(stations,
      v_q0.90_proy,
      v_q0.90_proy_fut,
      v_q0.90_proy_est,
+     v_q0.90_proy_est_fut,
      Y,
      vars_q0.90,
      file = 'data_q0.90/proyecciones.RData')
@@ -702,6 +708,7 @@ save(stations,
      v_q0.75_proy,
      v_q0.75_proy_fut,
      v_q0.75_proy_est,
+     v_q0.75_proy_est_fut,
      Y,
      vars_q0.75,
      file = 'data_q0.75/proyecciones.RData')
